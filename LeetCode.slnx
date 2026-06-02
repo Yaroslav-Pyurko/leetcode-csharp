@@ -1,3 +1,4 @@
 <Solution>
-  <Project Path="LeetCode/LeetCode.csproj" />
+  <Project Path="src/LeetCode/LeetCode.csproj" />
+  <Project Path="tests/LeetCode.Tests/LeetCode.Tests.csproj" Id="ef066aa1-6bb6-4f56-a1ea-d8717a98142f" />
 </Solution>
