@@ -1,4 +1,4 @@
-﻿namespace LeetCode
+﻿namespace LeetCode.Arrays
 {
     public class Class1
     {
