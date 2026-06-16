@@ -4,6 +4,9 @@
     {
         public bool IsPalindrome(int x)
         {
+            if (0 <= x && x <= 9)
+                return true;
+
             if (x < 0 || (x % 10 == 0 && x != 0))
                 return false;
 
