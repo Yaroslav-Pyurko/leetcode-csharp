@@ -1,6 +1,4 @@
-﻿using LeetCode.Arrays;
-
-namespace LeetCode.Tests
+﻿namespace LeetCode.Tests
 {
     public class LC0009_PalindromeNumberTests
     {

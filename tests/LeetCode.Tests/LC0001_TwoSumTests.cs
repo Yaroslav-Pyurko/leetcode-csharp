@@ -1,6 +1,4 @@
-﻿using LeetCode.Arrays;
-
-namespace LeetCode.Arrays.Tests
+﻿namespace LeetCode.Arrays.Tests
 {
     public class LC0001_TwoSumTests
     {
