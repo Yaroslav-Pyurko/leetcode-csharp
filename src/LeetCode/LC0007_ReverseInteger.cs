@@ -4,24 +4,33 @@
     {
         public int Reverse(int x)
         {
-            var result = 0;
+            // 1. Быстрая проверка на int.MinValue (так как Math.Abs от него вызовет переполнение)
+            if (x == int.MinValue) return 0;
 
-            while (x != 0)
+            int sign = x < 0 ? -1 : 1;
+            x = x < 0 ? -x : x;
+
+            int reversed = 0;
+
+            unchecked
             {
-                var lastDigit = x % 10;
-                var temp = result * 10 + lastDigit; // Add last digit to Result
-
-                // In case of overflow, the current value will not be equal to the previous one
-                var preResult = (temp - lastDigit) / 10;
-                if (preResult != result)
+                while (x > 0)
                 {
-                    return 0;
-                }
+                    int pop = x % 10;
+                    x /= 10;
 
-                result = temp;
-                x /= 10; // next digit
+                    // 2. Проверка на переполнение ДО умножения на 10.
+                    // int.MaxValue равен 2_147_483_647. Его деление на 10 — это 214_748_364, и остаток 7 
+                    if (reversed > 214_748_364 || (reversed == 214_748_364 && pop > 7))
+                    {
+                        return 0; // Переполнение, возвращаем 0 по условию задачи
+                    }
+
+                    reversed = (reversed * 10) + pop;
+                }
             }
-            return result;
+
+            return reversed * sign;
         }
     }
 }
