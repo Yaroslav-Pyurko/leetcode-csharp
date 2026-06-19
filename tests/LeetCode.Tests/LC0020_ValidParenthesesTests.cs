@@ -19,17 +19,32 @@
             var expected = true;
             Assert.Equal(expected, actual);
         }
+
+        [Fact]
+        public void Case3()
+        {
+            var solution = new LC0020_ValidParentheses();
+            var actual = solution.IsValid("(]");
+            var expected = false;
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void Case4()
+        {
+            var solution = new LC0020_ValidParentheses();
+            var actual = solution.IsValid("([])");
+            var expected = true;
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void Case5()
+        {
+            var solution = new LC0020_ValidParentheses();
+            var actual = solution.IsValid("([)]");
+            var expected = false;
+            Assert.Equal(expected, actual);
+        }
     }
 }
-
-/*
-
-Input: s = "(]"
-Output: false
-
-Input: s = "([])"
-Output: true
-
-Input: s = "([)]"
-Output: false
-*/
