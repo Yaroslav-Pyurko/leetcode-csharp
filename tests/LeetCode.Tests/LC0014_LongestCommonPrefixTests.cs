@@ -2,21 +2,13 @@
 {
     public class LC0014_LongestCommonPrefixTests
     {
-        [Fact]
-        public void Case1()
+        [Theory]
+        [InlineData(new string[] { "flower", "flow", "flight" }, "fl")]
+        [InlineData(new string[] { "dog", "racecar", "car" }, "")]
+        public void LongestCommonPrefix_ReturnsExpectedResult(string[] input, string expected)
         {
             var solution = new LC0014_LongestCommonPrefix();
-            var actual = solution.LongestCommonPrefix(["flower", "flow", "flight"]);
-            var expected = "fl";
-            Assert.Equal(expected, actual);
-        }
-
-        [Fact]
-        public void Case2()
-        {
-            var solution = new LC0014_LongestCommonPrefix();
-            var actual = solution.LongestCommonPrefix(["dog", "racecar", "car"]);
-            var expected = "";
+            var actual = solution.LongestCommonPrefix(input);
             Assert.Equal(expected, actual);
         }
     }
