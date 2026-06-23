@@ -4,16 +4,20 @@
     {
         public int RemoveDuplicates(int[] nums)
         {
-            var j = 1;
-            for (int i = 1; i < nums.Length; i++)
+            var uniqueNums = new SortedSet<int>();
+            for (int i = 0; i < nums.Length; i++)
             {
-                if (nums[i] != nums[i - 1])
-                {
-                    nums[j] = nums[i];
-                    j++;
-                }
+                uniqueNums.Add(nums[i]);
             }
-            return j;
+
+            // set array
+            //nums = hashSet.ToArray(); // doesn't work
+            for (int i = 0; i < uniqueNums.Count; i++)
+            {
+                nums[i] = uniqueNums.ElementAt(i);
+            }
+
+            return uniqueNums.Count();
         }
     }
 }
