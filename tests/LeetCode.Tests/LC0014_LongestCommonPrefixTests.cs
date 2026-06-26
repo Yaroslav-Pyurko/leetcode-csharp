@@ -1,4 +1,4 @@
-﻿namespace LeetCode.Arrays.Tests
+﻿namespace LeetCode.Tests
 {
     public class LC0014_LongestCommonPrefixTests
     {

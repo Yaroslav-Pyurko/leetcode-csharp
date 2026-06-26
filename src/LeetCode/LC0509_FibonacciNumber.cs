@@ -1,4 +1,4 @@
-﻿namespace LeetCode.Arrays
+﻿namespace LeetCode
 {
     public class LC0509_FibonacciNumber
     {
