@@ -1,4 +1,4 @@
-﻿using static LeetCode.LC0094_BinaryTreeInorderTraversal;
+﻿using LeetCode.Common;
 
 namespace LeetCode
 {

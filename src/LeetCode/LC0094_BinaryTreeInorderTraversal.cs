@@ -1,4 +1,6 @@
-﻿namespace LeetCode
+﻿using LeetCode.Common;
+
+namespace LeetCode
 {
     public class LC0094_BinaryTreeInorderTraversal
     {
@@ -19,13 +21,6 @@
             inOrder(node.left, ref result);
             result.Add(node.val);
             inOrder(node.right, ref result);
-        }
-
-        public class TreeNode
-        {
-            public int val { get; set; }
-            public TreeNode? left { get; set; }
-            public TreeNode? right { get; set; }
         }
     }
 }
