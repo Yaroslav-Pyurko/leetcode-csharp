@@ -4,7 +4,7 @@ namespace LeetCode
 {
     public class LC0094_BinaryTreeInorderTraversal
     {
-        IList<int> InorderTraversal(TreeNode root)
+        public IList<int> InorderTraversal(TreeNode root)
         {
             var result = new List<int>();
             inOrder(root, ref result);
