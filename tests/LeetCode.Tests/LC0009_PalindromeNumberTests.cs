@@ -10,7 +10,9 @@
         public void IsPalindrome_ReturnsExpectedResult(int input, bool expected)
         {
             var solution = new LC0009_PalindromeNumber();
+
             var actual = solution.IsPalindrome(input);
+
             Assert.Equal(expected, actual);
         }
     }

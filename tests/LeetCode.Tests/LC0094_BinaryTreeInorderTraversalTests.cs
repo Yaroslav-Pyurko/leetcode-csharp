@@ -8,7 +8,9 @@ namespace LeetCode.Tests
         public void Example1()
         {
             var root = TreeBuilder.Build(1, null, 2, 3);
+
             var result = new LC0094_BinaryTreeInorderTraversal().InorderTraversal(root);
+
             Assert.Equal(new[] { 1, 3, 2 }, result);
         }
 
@@ -16,6 +18,7 @@ namespace LeetCode.Tests
         public void EmptyTree()
         {
             var result = new LC0094_BinaryTreeInorderTraversal().InorderTraversal(null);
+
             Assert.Empty(result);
         }
 
@@ -23,7 +26,9 @@ namespace LeetCode.Tests
         public void SingleNode()
         {
             var root = TreeBuilder.Build(1);
+
             var result = new LC0094_BinaryTreeInorderTraversal().InorderTraversal(root);
+
             Assert.Equal(new[] { 1 }, result);
         }
 
@@ -31,7 +36,9 @@ namespace LeetCode.Tests
         public void CompleteTree()
         {
             var root = TreeBuilder.Build(1, 2, 3, 4, 5, 6, 7);
+
             var result = new LC0094_BinaryTreeInorderTraversal().InorderTraversal(root);
+
             Assert.Equal(new[] { 4, 2, 5, 1, 6, 3, 7 }, result);
         }
     }

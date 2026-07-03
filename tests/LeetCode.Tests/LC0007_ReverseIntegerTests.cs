@@ -11,7 +11,9 @@
         public void Reverse_ReturnsExpectedResult(int input, int expected)
         {
             var solution = new LC0007_ReverseInteger();
+
             var actual = solution.Reverse(input);
+
             Assert.Equal(expected, actual);
         }
     }

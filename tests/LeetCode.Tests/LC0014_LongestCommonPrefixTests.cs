@@ -8,7 +8,9 @@
         public void LongestCommonPrefix_ReturnsExpectedResult(string[] input, string expected)
         {
             var solution = new LC0014_LongestCommonPrefix();
+
             var actual = solution.LongestCommonPrefix(input);
+
             Assert.Equal(expected, actual);
         }
     }

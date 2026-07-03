@@ -11,7 +11,9 @@
         public void ContainsDuplicate_ReturnsExpectedResult(int[] input, bool expected)
         {
             var solution = new LC0217_ContainsDuplicate();
+
             var actual = solution.ContainsDuplicate(input);
+
             Assert.Equal(expected, actual);
         }
     }
