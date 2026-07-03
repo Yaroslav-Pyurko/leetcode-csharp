@@ -5,7 +5,7 @@ namespace LeetCode.Tests
     public class LC0144_BinaryTreePreorderTraversalTests
     {
         [Fact]
-        public void Example1()
+        public void Example1_ReturnsPreorderSequence()
         {
             var root = TreeBuilder.Build(1, null, 2, 3);
 
@@ -15,7 +15,7 @@ namespace LeetCode.Tests
         }
 
         [Fact]
-        public void EmptyTree()
+        public void EmptyTree_ReturnsEmptyList()
         {
             var result = new LC0144_BinaryTreePreorderTraversal().PreorderTraversal(null);
 
@@ -23,7 +23,7 @@ namespace LeetCode.Tests
         }
 
         [Fact]
-        public void SingleNode()
+        public void SingleNode_ReturnsSingleElement()
         {
             var root = TreeBuilder.Build(1);
 
@@ -33,7 +33,7 @@ namespace LeetCode.Tests
         }
 
         [Fact]
-        public void CompleteBinaryTree()
+        public void CompleteBinaryTree_ReturnsPreorderSequence()
         {
             //        1
             //      /   \
@@ -49,7 +49,7 @@ namespace LeetCode.Tests
         }
 
         [Fact]
-        public void LeftSkewedTree()
+        public void LeftSkewedTree_ReturnsPreorderSequence()
         {
             //     1
             //    /
@@ -65,7 +65,7 @@ namespace LeetCode.Tests
         }
 
         [Fact]
-        public void RightSkewedTree()
+        public void RightSkewedTree_ReturnsPreorderSequence()
         {
             // 1
             //  \

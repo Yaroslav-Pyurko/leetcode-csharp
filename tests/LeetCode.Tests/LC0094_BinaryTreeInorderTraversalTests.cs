@@ -15,7 +15,7 @@ namespace LeetCode.Tests
         }
 
         [Fact]
-        public void EmptyTree()
+        public void EmptyTree_ReturnsEmptyList()
         {
             var result = new LC0094_BinaryTreeInorderTraversal().InorderTraversal(null);
 
@@ -23,7 +23,7 @@ namespace LeetCode.Tests
         }
 
         [Fact]
-        public void SingleNode()
+        public void SingleNode_ReturnsSingleElement()
         {
             var root = TreeBuilder.Build(1);
 
@@ -33,7 +33,7 @@ namespace LeetCode.Tests
         }
 
         [Fact]
-        public void CompleteTree()
+        public void CompleteTree_ReturnsInorderSequence()
         {
             var root = TreeBuilder.Build(1, 2, 3, 4, 5, 6, 7);
 
