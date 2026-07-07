@@ -11,7 +11,7 @@
         {
             var solution = new LC0242_ValidAnagram();
 
-            var actual = solution.IsAnagramUltraFast(inputS, inputT);
+            var actual = solution.IsAnagram(inputS, inputT);
 
             Assert.Equal(expected, actual);
         }

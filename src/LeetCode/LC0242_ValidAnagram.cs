@@ -2,23 +2,30 @@
 {
     public class LC0242_ValidAnagram
     {
+        /// <summary>
+        /// Time complexity:  O(n)
+        /// Space complexity: O(1)
+        /// </summary>
         public bool IsAnagram(string s, string t)
         {
-            var sortS = SortSring(s);
-            var sortT = SortSring(t);
+            if (s.Length != t.Length)
+                return false;
 
-            if (String.Equals(sortS, sortT))
+            int[] count = new int[26];
+
+            for (int i = 0; i < s.Length; i++)
             {
-                return true;
+                count[s[i] - 'a']++;
             }
-            return false;
-        }
+                
+            for (int i = 0; i < t.Length; i++)
+            {
+                count[t[i] - 'a']--;
+                if (count[t[i] - 'a'] < 0)
+                    return false;
+            }
 
-        public static string SortSring(string s)
-        {
-            var charArray = s.ToLower().ToCharArray();
-            Array.Sort(charArray);
-            return new string(charArray);
+            return true;
         }
     }
 }
