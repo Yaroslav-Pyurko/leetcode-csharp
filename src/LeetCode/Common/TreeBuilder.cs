@@ -1,10 +1,4 @@
-﻿using LeetCode;
-using LeetCode.Common;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LeetCode.Common
+﻿namespace LeetCode.Common
 {
     public static class TreeBuilder
     {
