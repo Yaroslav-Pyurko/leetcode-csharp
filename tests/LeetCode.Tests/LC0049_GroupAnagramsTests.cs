@@ -10,25 +10,21 @@
         {
             List<List<string>> expected = expectedGroups
                 .Select(group => group
-                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Split(',')
                     .ToList())
                 .ToList();
             var solution = new LC0049_GroupAnagrams();
 
             var actual = solution.GroupAnagrams(inputArray);
 
-            Assert.Equal(expected, actual);
-
             var normalizedExpected = expected
                 .Select(group => group.OrderBy(word => word).ToList())
                 .OrderBy(group => group.FirstOrDefault() ?? string.Empty)
                 .ToList();
-
             var normalizedActual = actual
                 .Select(group => group.OrderBy(word => word).ToList())
                 .OrderBy(group => group.FirstOrDefault() ?? string.Empty)
                 .ToList();
-
             Assert.Equal(normalizedExpected, normalizedActual);
         }
     }
