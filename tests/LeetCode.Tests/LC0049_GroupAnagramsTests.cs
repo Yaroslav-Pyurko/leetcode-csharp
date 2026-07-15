@@ -6,6 +6,7 @@
         [InlineData(new string[] { "eat", "tea", "tan", "ate", "nat", "bat" }, "bat", "nat,tan", "ate,eat,tea")]
         [InlineData(new string[] { "" }, "")]
         [InlineData(new string[] { "a" }, "a")]
+        [InlineData(new string[] { "^:;!@&*" }, "^:;!@&*")]
         public void Test_WithFlattenedData(string[] inputArray, params string[] expectedGroups)
         {
             List<List<string>> expected = expectedGroups
