@@ -1,8 +1,5 @@
 ﻿namespace LeetCode
 {
-    /// <summary>
-    /// aka Japan Dictionary ex SKB Kontur
-    /// </summary>
     public class LC0049_GroupAnagrams
     {
         public List<List<string>> GroupAnagrams(string[] words)
