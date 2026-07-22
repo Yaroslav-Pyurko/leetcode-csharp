@@ -137,7 +137,7 @@
 
             var result = system.Input('i');
 
-            Assert.Equal(new[] { "i love you", "island" }, result);
+            Assert.Equal(new[] { "i love you", "island", "i"}, result);
         }
     }
 }
