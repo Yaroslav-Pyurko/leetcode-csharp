@@ -11,7 +11,7 @@ namespace LeetCode
             return result;
         }
 
-        public void inOrder(TreeNode? node, ref List<int> result)
+        private void inOrder(TreeNode? node, ref List<int> result)
         {
             if (node == null)
             {
