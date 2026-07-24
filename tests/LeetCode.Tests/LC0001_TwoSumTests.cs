@@ -5,11 +5,11 @@
         [Fact]
         public void Case1()
         {
-            var s = new LC0001_TwoSum();
+            var solution = new LC0001_TwoSum();
 
-            var res = s.TwoSum([2, 7, 11, 15], 9);
+            var actual = solution.TwoSum([2, 7, 11, 15], 9);
 
-            Assert.Equal(new[] { 0, 1 }, res);
+            Assert.Equal(new[] { 0, 1 }, actual);
         }
     }
 }
