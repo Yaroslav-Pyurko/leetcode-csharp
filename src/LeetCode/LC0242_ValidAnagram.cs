@@ -2,10 +2,6 @@
 {
     public class LC0242_ValidAnagram
     {
-        /// <summary>
-        /// Time complexity:  O(n)
-        /// Space complexity: O(1)
-        /// </summary>
         public bool IsAnagram(string s, string t)
         {
             if (s.Length != t.Length)
