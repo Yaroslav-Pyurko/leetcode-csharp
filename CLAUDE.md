@@ -2,6 +2,12 @@
 
 Guidance for Claude when working in this repository.
 
+**Maintain this file as you go.** The owner has given standing permission to
+edit it without asking: correct anything you find stale, record decisions and
+conventions as they are agreed, and keep the backlog below current. He reviews
+the diff before committing, so a wrong edit costs nothing but is still worth
+avoiding. Do not let this file drift - a stale CLAUDE.md is worse than none.
+
 ## What this is
 
 LeetCode solutions in C#, targeting .NET 10. Three projects, wired together by
@@ -12,6 +18,11 @@ LeetCode solutions in C#, targeting .NET 10. Three projects, wired together by
 | `src/LeetCode` | the solutions (class library) |
 | `tests/LeetCode.Tests` | xUnit tests, one file per solution |
 | `benchmarks/LeetCode.Benchmarks` | BenchmarkDotNet console app |
+
+Two READMEs, cross-linked: the root one carries the problem index with per-
+problem complexity, `benchmarks/LeetCode.Benchmarks/README.md` carries how to run
+the benchmarks and what past runs measured. Prose that cannot live in a name
+belongs in one of those two - see the comments section below.
 
 ## Commands
 
@@ -78,9 +89,15 @@ encoded as a test whose name carries the fact (`Fib_46_ReturnsLargestValueThatFi
 documents an overflow boundary and fails if it stops being true; a comment
 cannot do that).
 
-Outstanding: the XML doc comment on `LC0509_FibonacciNumber` is ~25 lines of
-prose explaining three approaches. It predates this rule and should move to a
-README.
+Where the prose goes, concretely. The root README has a **Notes** section after
+the index table, for the few problems where *why* is worth a paragraph: the
+LC0509 entry there explains naive recursion vs memoisation vs tabulation, which
+used to be a 25-line doc comment in the source file. Add to that section rather
+than to a source file when an explanation is genuinely worth keeping - and only
+when it is. Most problems need nothing beyond their table row.
+
+Measurement results and anything about *how fast* go in the benchmarks README
+instead; the two cross-link.
 
 If you do write an XML doc comment, remember it is XML: a bare `<` starts a tag
 and makes the comment malformed (CS1570, currently invisible because
@@ -104,24 +121,54 @@ and makes the comment malformed (CS1570, currently invisible because
 
 Reviewed and accepted, not yet done. Roughly in order of leverage:
 
-1. `Directory.Build.props` with `TreatWarningsAsErrors` and
-   `GenerateDocumentationFile`. Most of items 5-8 below surface automatically
-   once it exists, instead of being found by eye.
-2. Root `README.md` with the problem index: number, name, difficulty, link,
-   topic, complexity.
-3. CI running `dotnet test` on push.
-4. Root `.editorconfig`.
-5. `LC2236` - dereferences `root.left` / `root.right` without a null check.
-6. `LC0014` - `Array.Sort(strs)` mutates the caller's array;
+1. `Directory.Build.props` holding the properties currently duplicated across
+   all three csproj files (`TargetFramework`, `ImplicitUsings`, `Nullable`),
+   plus `TreatWarningsAsErrors`. Note that `Nullable` is *already* enabled, so
+   items 4-7 below are warnings the compiler emits today and nobody reads;
+   `TreatWarningsAsErrors` adds no analysis, it only stops the ignoring.
+   Expect roughly 8-12 diagnostics across 5-6 files - a bounded job.
+
+   Two traps: adding `GenerateDocumentationFile` also turns on **CS1591**
+   ("missing XML comment for publicly visible member"), which would demand a doc
+   comment on every public member - the opposite of the rule above, and an
+   instant build failure under `TreatWarningsAsErrors`. Pair it with
+   `<NoWarn>$(NoWarn);CS1591</NoWarn>`. And do not add `EnforceCodeStyleInBuild`
+   or `AnalysisLevel` at the same time; those raise hundreds of IDE#### style
+   diagnostics and are a separate decision.
+
+   Land it as two commits: deduplication first (no behaviour change), the
+   strictness flag second, so it can be reverted on its own.
+2. CI running `dotnet test` on push. The remote is
+   `github.com/Yaroslav-Pyurko/leetcode-csharp`, branch `main`, public, so
+   Actions minutes are free. This is what would have caught the broken
+   `benchmark.cs` that sat in the test project unnoticed for weeks. Do not run
+   benchmarks in CI - shared runners produce meaningless nanosecond numbers.
+3. Root `.editorconfig`.
+4. `LC2236` - dereferences `root.left` / `root.right` without a null check.
+5. `LC0014` - `Array.Sort(strs)` mutates the caller's array;
    `IsNullOrWhiteSpace` should be `IsNullOrEmpty`.
-7. `LC0642` - no namespace; `currentQuery += c` in a loop is O(n^2);
+6. `LC0642` - no namespace; `currentQuery += c` in a loop is O(n^2);
    `currNode` is non-nullable but assigned `null`.
-8. `LC0021`, `LC0094`, `LC0144` - signatures declared non-nullable while the
+7. `LC0021`, `LC0094`, `LC0144` - signatures declared non-nullable while the
    code and tests pass and return `null`.
-9. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
+8. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
    the input grid; the iterative baseline in the benchmarks project shows the
    alternative.
-10. `LC0094`, `LC0144` - `ref List<int>` is unnecessary for a reference type;
-    private methods `inOrder` / `preOrder` should be PascalCase.
-11. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
+9. `LC0094`, `LC0144` - `ref List<int>` is unnecessary for a reference type;
+   private methods `inOrder` / `preOrder` should be PascalCase.
+10. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
     special-cased in `LC0007` but never tested.
+11. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
+    benchmarks README is still a placeholder.
+
+## Done
+
+- Benchmarks split out of the test project into
+  `benchmarks/LeetCode.Benchmarks` (they had been silently breaking the build).
+- Root `README.md` with the problem index, complexity per solution, a Notes
+  section for explanations that no longer live in code, and cross-links to the
+  benchmarks README.
+- `LC0026` rewritten to two pointers, `LC0217` to a `HashSet`, `LC0509` to a
+  rolling pair - all three were asymptotically worse than the problem intended.
+- `LC0509` benchmarked against two community variants; results and analysis are
+  in the benchmarks README.
