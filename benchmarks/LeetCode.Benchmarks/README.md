@@ -1,5 +1,8 @@
 # LeetCode.Benchmarks
 
+Part of [leetcode-csharp](../../README.md) - the root README holds the problem
+index.
+
 Micro-benchmarks for the solutions in `src/LeetCode`, powered by
 [BenchmarkDotNet](https://benchmarkdotnet.org/).
 

@@ -5,6 +5,28 @@ one xUnit test file per solution in `tests/LeetCode.Tests`.
 
 **20 solved:** 15 Easy, 4 Medium, 1 Hard.
 
+## Layout
+
+| Path | Contents |
+|---|---|
+| `src/LeetCode` | solutions, one class per problem |
+| `tests/LeetCode.Tests` | xUnit tests, one file per solution |
+| `benchmarks/LeetCode.Benchmarks` | BenchmarkDotNet comparisons - [README](benchmarks/LeetCode.Benchmarks/README.md) |
+
+## Building and running
+
+```bash
+dotnet build
+dotnet test
+dotnet run -c Release --project benchmarks/LeetCode.Benchmarks -- --filter *
+```
+
+`-c Release` is required for the benchmarks: on a Debug build the run is rejected
+before anything is measured. How to read the output, and the measurements taken
+so far, are in the [benchmarks README](benchmarks/LeetCode.Benchmarks/README.md).
+
+## Solutions
+
 Complexity below describes the implementation in this repository, not the
 theoretical optimum. `n` is the input size, `m` the second input or the string
 length, `h` the tree height, `r` and `c` the grid dimensions, `k` the word or
