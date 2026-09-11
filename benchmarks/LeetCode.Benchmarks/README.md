@@ -78,6 +78,12 @@ meaningful as ratios. Re-measure before trusting them on other hardware.
 
 ### LC0509 - Fibonacci, 2026-09
 
+Background - why the solution is a bottom-up loop rather than recursion, and how
+tabulation differs from memoisation - is in the
+[root README notes](../../README.md#509---fibonacci-number). What follows is the
+narrower question: three formulations that are all O(n), and why they are not
+equally fast.
+
 | Method | N | Mean | Ratio | Allocated |
 |---|---:|---:|---:|---:|
 | Rolling pair (src) | 30 | 9.151 ns | 1.00 | - |
@@ -133,3 +139,38 @@ Not run yet.
   subtracted.
 - Construct the objects under test once, in fields, so the measurement is the
   method and not the allocation.
+
+## Notes
+
+A table row states what a solution does. These are the few cases where *why* is
+worth a paragraph, and where that reasoning has nowhere else to live - the code
+itself carries no comments by design.
+
+### 509 - Fibonacci Number
+
+Three ways to evaluate F(n), in the order they tend to get discovered:
+
+1. **Plain recursion** - `F(n) = F(n-1) + F(n-2)`, straight off the definition.
+   Beautiful, and O(phi^n): the two calls re-derive overlapping subtrees from
+   scratch, so F(30) alone expands to roughly 2.7 million calls.
+2. **Memoisation (top-down)** - keep the recursion, but cache each F(i) so it is
+   computed once. O(n) time, at the cost of an O(n) table plus n stack frames.
+3. **Tabulation (bottom-up)** - fill the same table forwards from F(0), so
+   nothing recurses. And since F(i) reads only F(i-1) and F(i-2), the table never
+   needs more than its last two entries: it collapses into two variables. O(n)
+   time, O(1) space. This is what the solution here does, and
+   [198 House Robber](src/LeetCode/LC0198_HouseRobber.cs) uses the identical
+   two-variable pattern.
+
+Worth naming precisely, because the terms get swapped: (3) is **not**
+memoisation. Nothing is cached and nothing recurses. It is the same
+dynamic-programming recurrence evaluated in the opposite direction, and that
+direction is exactly what lets the storage shrink to a constant.
+
+`int` holds Fibonacci numbers up to F(46) = 1,836,311,903; F(47) overflows.
+LeetCode constrains n to [0, 30], so it never bites here - and the boundary is
+pinned by a test rather than described in a comment.
+
+Rolling pair, memoisation and a two-slot array are not equally fast even though
+all three are O(n). Measured comparison, and why the array formulation loses:
+[benchmarks README](benchmarks/LeetCode.Benchmarks/README.md#lc0509---fibonacci-2026-09).
