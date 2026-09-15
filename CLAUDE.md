@@ -89,15 +89,13 @@ encoded as a test whose name carries the fact (`Fib_46_ReturnsLargestValueThatFi
 documents an overflow boundary and fails if it stops being true; a comment
 cannot do that).
 
-Where the prose goes, concretely. The root README has a **Notes** section after
-the index table, for the few problems where *why* is worth a paragraph: the
-LC0509 entry there explains naive recursion vs memoisation vs tabulation, which
-used to be a 25-line doc comment in the source file. Add to that section rather
-than to a source file when an explanation is genuinely worth keeping - and only
-when it is. Most problems need nothing beyond their table row.
-
-Measurement results and anything about *how fast* go in the benchmarks README
-instead; the two cross-link.
+Where the prose goes. The root README carries the index table with a one-cell
+approach label and the complexity per solution; the benchmarks README carries
+measurements and anything about *how fast*. A longer-form Notes section was
+added to the root README for LC0509 and then removed again, so at present the
+repository keeps no per-problem prose beyond the table row - do not reintroduce
+one without asking. The default remains: if it cannot live in a name, prefer a
+test name that pins it, and otherwise keep it out.
 
 If you do write an XML doc comment, remember it is XML: a bare `<` starts a tag
 and makes the comment malformed (CS1570, currently invisible because
@@ -124,7 +122,7 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
 1. `Directory.Build.props` holding the properties currently duplicated across
    all three csproj files (`TargetFramework`, `ImplicitUsings`, `Nullable`),
    plus `TreatWarningsAsErrors`. Note that `Nullable` is *already* enabled, so
-   items 4-7 below are warnings the compiler emits today and nobody reads;
+   items 4-6 below are warnings the compiler emits today and nobody reads;
    `TreatWarningsAsErrors` adds no analysis, it only stops the ignoring.
    Expect roughly 8-12 diagnostics across 5-6 files - a bounded job.
 
@@ -145,30 +143,30 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
    benchmarks in CI - shared runners produce meaningless nanosecond numbers.
 3. Root `.editorconfig`.
 4. `LC2236` - dereferences `root.left` / `root.right` without a null check.
-5. `LC0014` - `Array.Sort(strs)` mutates the caller's array;
-   `IsNullOrWhiteSpace` should be `IsNullOrEmpty`.
-6. `LC0642` - no namespace; `currentQuery += c` in a loop is O(n^2);
+5. `LC0642` - no namespace; `currentQuery += c` in a loop is O(n^2);
    `currNode` is non-nullable but assigned `null`.
-7. `LC0021`, `LC0094`, `LC0144` - signatures declared non-nullable while the
+6. `LC0021`, `LC0094`, `LC0144` - signatures declared non-nullable while the
    code and tests pass and return `null`.
-8. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
+7. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
    the input grid; the iterative baseline in the benchmarks project shows the
    alternative.
-9. `LC0094`, `LC0144` - `ref List<int>` is unnecessary for a reference type;
+8. `LC0094`, `LC0144` - `ref List<int>` is unnecessary for a reference type;
    private methods `inOrder` / `preOrder` should be PascalCase.
-10. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
+9. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
     special-cased in `LC0007` but never tested.
-11. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
+10. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
     benchmarks README is still a placeholder.
 
 ## Done
 
 - Benchmarks split out of the test project into
   `benchmarks/LeetCode.Benchmarks` (they had been silently breaking the build).
-- Root `README.md` with the problem index, complexity per solution, a Notes
-  section for explanations that no longer live in code, and cross-links to the
-  benchmarks README.
+- Root `README.md` with the problem index, complexity per solution, build
+  commands, and cross-links to the benchmarks README.
 - `LC0026` rewritten to two pointers, `LC0217` to a `HashSet`, `LC0509` to a
   rolling pair - all three were asymptotically worse than the problem intended.
 - `LC0509` benchmarked against two community variants; results and analysis are
   in the benchmarks README.
+- `LC0014` rewritten from sort-then-compare to a vertical scan: it no longer
+  reorders the caller's array, no longer discards whitespace-only elements, and
+  drops from O(m * n log n) to O(n * m). Tests now pin both former defects.
