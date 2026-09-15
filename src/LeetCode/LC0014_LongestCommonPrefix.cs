@@ -4,22 +4,29 @@
     {
         public string LongestCommonPrefix(string[] strs)
         {
-            if (strs.Length == 0 || strs.Any(x => string.IsNullOrWhiteSpace(x)))
+            if (strs.Length == 0)
             {
                 return string.Empty;
             }
 
-            Array.Sort(strs);
-            string first = strs[0];
-            string last = strs[strs.Length - 1];
-            int i = 0;
-            while (i < first.Length && i < last.Length)
+            string candidate = strs[0];
+
+            for (int position = 0; position < candidate.Length; position++)
             {
-                if (first[i] == last[i])
-                    i++;
-                else break;
+                char expected = candidate[position];
+
+                for (int other = 1; other < strs.Length; other++)
+                {
+                    string word = strs[other];
+
+                    if (position == word.Length || word[position] != expected)
+                    {
+                        return candidate[..position];
+                    }
+                }
             }
-            return first.Substring(0, i);
+
+            return candidate;
         }
     }
 }
