@@ -50,6 +50,14 @@ device bridge. The cloud container has **no .NET SDK**. So:
 Files written back to the device must keep the repo's encoding: **UTF-8 with BOM
 and CRLF** for `.cs` and `.csproj`, CRLF without BOM for `.md` and `.slnx`.
 
+The owner switches git branches between turns, so the working tree can change
+under you with no message in the conversation. A file you wrote earlier may come
+back looking reverted - that is a checkout, not someone rejecting the edit, and
+re-applying it blindly would write one branch's content onto another. Before
+editing any file you have not read *this turn*, re-read it from the device and
+diff against your copy. `.git/HEAD` names the current branch if it matters which
+one you are about to change.
+
 ## Naming and layout
 
 | Kind | Path | Type and namespace |
@@ -68,6 +76,39 @@ is a known defect, not a pattern to copy.
 Style: block-scoped namespaces, Allman braces, four spaces. Test methods read
 `Method_Scenario_ExpectedResult`; several older files predate that and are on the
 backlog.
+
+One test class per solution, and inside it prefer **a single `[Theory]` with
+`InlineData` rows** over several methods. Do not split a group of cases into its
+own method just to give the group a name - if the signature is the same, it is
+the same test, and the rows say what the name would have. A second method earns
+its place only when it genuinely needs a different signature or fixture. An
+assertion that holds for every row (for example "the input array is not
+modified") belongs inside the one theory, where it is checked on every row rather
+than on one hand-picked case.
+
+## Write to the LeetCode constraints, and no further
+
+Every solution targets one problem with a published Constraints section. Code
+that handles inputs the constraints rule out is dead weight: it can never run, it
+still has to be read and maintained, and it hides which guarantees the algorithm
+actually relies on. Read the constraints before adding a guard, and delete guards
+that the constraints make unreachable.
+
+LC0014 is the worked example. Its constraints are `1 <= strs.length <= 200`,
+`0 <= strs[i].length <= 200`, lowercase letters only when non-empty. So:
+
+- `if (strs.Length == 0)` was removed - the array is never empty, `strs[0]` is
+  always safe.
+- Test rows with whitespace characters were removed - out of the alphabet.
+- Test rows with empty strings stayed - `0 <= strs[i].length` allows them.
+
+The same applies to test data: a row exercising input the constraints forbid
+proves nothing about the submitted solution.
+
+This is a rule about *unreachable* code, not about correctness. Keep a check the
+constraints permit to matter. And do not confuse it with regression tests: the
+LC0014 theory still asserts the input array is not reordered, which LeetCode does
+not require but which pins a defect that was really there.
 
 ## Comments: the owner does not want them
 
@@ -89,13 +130,13 @@ encoded as a test whose name carries the fact (`Fib_46_ReturnsLargestValueThatFi
 documents an overflow boundary and fails if it stops being true; a comment
 cannot do that).
 
-Where the prose goes. The root README carries the index table with a one-cell
+Where the prose goes. The root README carries the index table - a one-cell
 approach label and the complexity per solution; the benchmarks README carries
-measurements and anything about *how fast*. A longer-form Notes section was
-added to the root README for LC0509 and then removed again, so at present the
-repository keeps no per-problem prose beyond the table row - do not reintroduce
-one without asking. The default remains: if it cannot live in a name, prefer a
-test name that pins it, and otherwise keep it out.
+measurements and anything about *how fast*. A longer-form Notes section was once
+added to the root README for LC0509 and then removed again, so the repository
+currently keeps no per-problem prose beyond the table row; do not reintroduce one
+without asking. The default stands: if a fact cannot live in a name, prefer a
+test name that pins it, and otherwise leave it out.
 
 If you do write an XML doc comment, remember it is XML: a bare `<` starts a tag
 and makes the comment malformed (CS1570, currently invisible because
@@ -122,7 +163,7 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
 1. `Directory.Build.props` holding the properties currently duplicated across
    all three csproj files (`TargetFramework`, `ImplicitUsings`, `Nullable`),
    plus `TreatWarningsAsErrors`. Note that `Nullable` is *already* enabled, so
-   items 4-6 below are warnings the compiler emits today and nobody reads;
+   items 5-7 below are warnings the compiler emits today and nobody reads;
    `TreatWarningsAsErrors` adds no analysis, it only stops the ignoring.
    Expect roughly 8-12 diagnostics across 5-6 files - a bounded job.
 
@@ -142,19 +183,26 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
    `benchmark.cs` that sat in the test project unnoticed for weeks. Do not run
    benchmarks in CI - shared runners produce meaningless nanosecond numbers.
 3. Root `.editorconfig`.
-4. `LC2236` - dereferences `root.left` / `root.right` without a null check.
-5. `LC0642` - no namespace; `currentQuery += c` in a loop is O(n^2);
+4. Audit the guards that the constraints make unreachable, per the rule above.
+   Known cases: `LC0198` opens with `nums == null || nums.Length == 0` though
+   `1 <= nums.length`; `LC0200` opens with `grid == null || grid.Length == 0`
+   though `1 <= m, n`. Delete rather than keep.
+5. `LC2236` - dereferences `root.left` / `root.right`, which the compiler flags
+   under nullable. Note the constraints say the tree has exactly three nodes, so
+   the children are never null: the fix is an annotation (`root.left!.val`), not
+   a runtime null check that could never fire.
+6. `LC0642` - no namespace; `currentQuery += c` in a loop is O(n^2);
    `currNode` is non-nullable but assigned `null`.
-6. `LC0021`, `LC0094`, `LC0144` - signatures declared non-nullable while the
+7. `LC0021`, `LC0094`, `LC0144` - signatures declared non-nullable while the
    code and tests pass and return `null`.
-7. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
+8. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
    the input grid; the iterative baseline in the benchmarks project shows the
    alternative.
-8. `LC0094`, `LC0144` - `ref List<int>` is unnecessary for a reference type;
+9. `LC0094`, `LC0144` - `ref List<int>` is unnecessary for a reference type;
    private methods `inOrder` / `preOrder` should be PascalCase.
-9. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
+10. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
     special-cased in `LC0007` but never tested.
-10. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
+11. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
     benchmarks README is still a placeholder.
 
 ## Done
@@ -169,4 +217,6 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
   in the benchmarks README.
 - `LC0014` rewritten from sort-then-compare to a vertical scan: it no longer
   reorders the caller's array, no longer discards whitespace-only elements, and
-  drops from O(m * n log n) to O(n * m). Tests now pin both former defects.
+  drops from O(m * n log n) to O(n * m). Both former defects are pinned by
+  tests, and the solution and its rows were then trimmed to exactly what the
+  LeetCode constraints allow.

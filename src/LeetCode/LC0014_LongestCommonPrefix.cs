@@ -4,11 +4,6 @@
     {
         public string LongestCommonPrefix(string[] strs)
         {
-            if (strs.Length == 0)
-            {
-                return string.Empty;
-            }
-
             string candidate = strs[0];
 
             for (int position = 0; position < candidate.Length; position++)
