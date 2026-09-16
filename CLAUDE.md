@@ -46,6 +46,8 @@ device bridge. The cloud container has **no .NET SDK**. So:
   checking it against known values. Do that before claiming an algorithm works.
 - Ask the user to run `dotnet build` / `dotnet test` and report back.
 - Never state that code compiles or that tests pass. You have not seen either.
+- The bridge refuses to write under `.github/workflows/`. Workflow YAML has to be
+  handed to the owner to place; do not report such a file as committed.
 
 Files written back to the device must keep the repo's encoding: **UTF-8 with BOM
 and CRLF** for `.cs` and `.csproj`, CRLF without BOM for `.md` and `.slnx`.
@@ -105,10 +107,16 @@ LC0014 is the worked example. Its constraints are `1 <= strs.length <= 200`,
 The same applies to test data: a row exercising input the constraints forbid
 proves nothing about the submitted solution.
 
-This is a rule about *unreachable* code, not about correctness. Keep a check the
-constraints permit to matter. And do not confuse it with regression tests: the
-LC0014 theory still asserts the input array is not reordered, which LeetCode does
-not require but which pins a defect that was really there.
+This is a rule about *unreachable* code, not about correctness: keep any check the
+constraints permit to matter.
+
+The rule was applied to LC0014 all the way down. An earlier version of its theory
+also asserted that the input array came back unreordered - a regression pin for a
+real defect, the old `Array.Sort(strs)`. The owner removed it too, on the grounds
+that LeetCode does not require it and that nothing in this repository calls the
+method except the test itself. So the precedent is strict: beyond-spec checks go,
+even ones guarding a defect that actually happened. A rewrite reintroducing a
+sort would be a deliberate act, not a silent regression.
 
 ## Comments: the owner does not want them
 
@@ -175,13 +183,20 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
    or `AnalysisLevel` at the same time; those raise hundreds of IDE#### style
    diagnostics and are a separate decision.
 
+   CI already runs `dotnet build` and `dotnet test`, so once this lands the
+   strictness is enforced on every push rather than whenever someone builds
+   locally.
+
    Land it as two commits: deduplication first (no behaviour change), the
    strictness flag second, so it can be reverted on its own.
-2. CI running `dotnet test` on push. The remote is
-   `github.com/Yaroslav-Pyurko/leetcode-csharp`, branch `main`, public, so
-   Actions minutes are free. This is what would have caught the broken
-   `benchmark.cs` that sat in the test project unnoticed for weeks. Do not run
-   benchmarks in CI - shared runners produce meaningless nanosecond numbers.
+2. CI. `.github/workflows/ci.yml` has been written - restore, build and test in
+   Release on every push and pull request to `main` - but it is NOT in the
+   repository yet: the device bridge refuses to write under
+   `.github/workflows/`, so the owner has to place the file by hand. Check
+   whether it exists before rewriting it. `ubuntu-latest` ships the .NET 10 SDK,
+   so `setup-dotnet` resolves it without a download and a run takes 1-2 minutes.
+   Benchmarks are deliberately excluded - shared runners produce meaningless
+   nanosecond numbers.
 3. Root `.editorconfig`.
 4. Audit the guards that the constraints make unreachable, per the rule above.
    Known cases: `LC0198` opens with `nums == null || nums.Length == 0` though
@@ -217,6 +232,5 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
   in the benchmarks README.
 - `LC0014` rewritten from sort-then-compare to a vertical scan: it no longer
   reorders the caller's array, no longer discards whitespace-only elements, and
-  drops from O(m * n log n) to O(n * m). Both former defects are pinned by
-  tests, and the solution and its rows were then trimmed to exactly what the
-  LeetCode constraints allow.
+  drops from O(m * n log n) to O(n * m). The solution and its test rows were then
+  trimmed to exactly what the LeetCode constraints allow.
