@@ -46,8 +46,6 @@ device bridge. The cloud container has **no .NET SDK**. So:
   checking it against known values. Do that before claiming an algorithm works.
 - Ask the user to run `dotnet build` / `dotnet test` and report back.
 - Never state that code compiles or that tests pass. You have not seen either.
-- The bridge refuses to write under `.github/workflows/`. Workflow YAML has to be
-  handed to the owner to place; do not report such a file as committed.
 
 Files written back to the device must keep the repo's encoding: **UTF-8 with BOM
 and CRLF** for `.cs` and `.csproj`, CRLF without BOM for `.md` and `.slnx`.
@@ -173,7 +171,10 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
    plus `TreatWarningsAsErrors`. Note that `Nullable` is *already* enabled, so
    items 5-7 below are warnings the compiler emits today and nobody reads;
    `TreatWarningsAsErrors` adds no analysis, it only stops the ignoring.
-   Expect roughly 8-12 diagnostics across 5-6 files - a bounded job.
+   Expect **at least 20** diagnostics across 9 files. An earlier estimate here
+   said 8-12; that counted the solution files and badly undercounted the test
+   project, where every `TreeBuilder.Build(...)` result feeds a non-nullable
+   parameter. Still bounded, but plan for an afternoon, not ten minutes.
 
    Two traps: adding `GenerateDocumentationFile` also turns on **CS1591**
    ("missing XML comment for publicly visible member"), which would demand a doc
@@ -183,20 +184,13 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
    or `AnalysisLevel` at the same time; those raise hundreds of IDE#### style
    diagnostics and are a separate decision.
 
-   CI already runs `dotnet build` and `dotnet test`, so once this lands the
-   strictness is enforced on every push rather than whenever someone builds
-   locally.
-
    Land it as two commits: deduplication first (no behaviour change), the
    strictness flag second, so it can be reverted on its own.
-2. CI. `.github/workflows/ci.yml` has been written - restore, build and test in
-   Release on every push and pull request to `main` - but it is NOT in the
-   repository yet: the device bridge refuses to write under
-   `.github/workflows/`, so the owner has to place the file by hand. Check
-   whether it exists before rewriting it. `ubuntu-latest` ships the .NET 10 SDK,
-   so `setup-dotnet` resolves it without a download and a run takes 1-2 minutes.
-   Benchmarks are deliberately excluded - shared runners produce meaningless
-   nanosecond numbers.
+2. CI running `dotnet test` on push. The remote is
+   `github.com/Yaroslav-Pyurko/leetcode-csharp`, branch `main`, public, so
+   Actions minutes are free. This is what would have caught the broken
+   `benchmark.cs` that sat in the test project unnoticed for weeks. Do not run
+   benchmarks in CI - shared runners produce meaningless nanosecond numbers.
 3. Root `.editorconfig`.
 4. Audit the guards that the constraints make unreachable, per the rule above.
    Known cases: `LC0198` opens with `nums == null || nums.Length == 0` though
