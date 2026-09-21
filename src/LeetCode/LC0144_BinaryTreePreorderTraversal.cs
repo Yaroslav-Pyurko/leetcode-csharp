@@ -4,23 +4,23 @@ namespace LeetCode
 {
     public class LC0144_BinaryTreePreorderTraversal
     {
-        public IList<int> PreorderTraversal(TreeNode root)
+        public IList<int> PreorderTraversal(TreeNode? root)
         {
             var result = new List<int>();
-            preOrder(root, ref result);
+            PreOrder(root, result);
             return result;
         }
 
-        private void preOrder(TreeNode node, ref List<int> result)
+        private void PreOrder(TreeNode? node, List<int> result)
         {
-            if (node == null)
+            if (node is null)
             {
                 return;
             }
 
             result.Add(node.val);
-            preOrder(node.left, ref result);
-            preOrder(node.right, ref result);
+            PreOrder(node.left, result);
+            PreOrder(node.right, result);
         }
     }
 }

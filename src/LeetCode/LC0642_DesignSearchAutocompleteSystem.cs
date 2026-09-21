@@ -10,7 +10,7 @@ public class LC0642_DesignSearchAutocompleteSystem
     }
 
     private TrieNode root;
-    private TrieNode currNode;
+    private TrieNode? currNode;
     private string currentQuery;
 
     public LC0642_DesignSearchAutocompleteSystem(string[] sentences, int[] times)

@@ -14,7 +14,7 @@ namespace LeetCode.Tests
         public void CheckTree_RootEqualsSumOfChildren_ReturnsExpectedResult(int[] treeValues, bool expected)
         {
             int?[] nullableTreeValues = Array.ConvertAll(treeValues, x => (int?)x);
-            var root = TreeBuilder.Build(nullableTreeValues);
+            var root = TreeBuilder.Build(nullableTreeValues)!;
 
             var actual = _solution.CheckTree(root);
             
