@@ -169,7 +169,7 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
 1. `Directory.Build.props` holding the properties currently duplicated across
    all three csproj files (`TargetFramework`, `ImplicitUsings`, `Nullable`),
    plus `TreatWarningsAsErrors`. Note that `Nullable` is *already* enabled, so
-   items 5-7 below are warnings the compiler emits today and nobody reads;
+   items 4-6 below are warnings the compiler emits today and nobody reads;
    `TreatWarningsAsErrors` adds no analysis, it only stops the ignoring.
    Expect **at least 20** diagnostics across 9 files. An earlier estimate here
    said 8-12; that counted the solution files and badly undercounted the test
@@ -186,36 +186,34 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
 
    Land it as two commits: deduplication first (no behaviour change), the
    strictness flag second, so it can be reverted on its own.
-2. CI running `dotnet test` on push. The remote is
-   `github.com/Yaroslav-Pyurko/leetcode-csharp`, branch `main`, public, so
-   Actions minutes are free. This is what would have caught the broken
-   `benchmark.cs` that sat in the test project unnoticed for weeks. Do not run
-   benchmarks in CI - shared runners produce meaningless nanosecond numbers.
-3. Root `.editorconfig`.
-4. Audit the guards that the constraints make unreachable, per the rule above.
+2. Root `.editorconfig`.
+3. Audit the guards that the constraints make unreachable, per the rule above.
    Known cases: `LC0198` opens with `nums == null || nums.Length == 0` though
    `1 <= nums.length`; `LC0200` opens with `grid == null || grid.Length == 0`
    though `1 <= m, n`. Delete rather than keep.
-5. `LC2236` - dereferences `root.left` / `root.right`, which the compiler flags
+4. `LC2236` - dereferences `root.left` / `root.right`, which the compiler flags
    under nullable. Note the constraints say the tree has exactly three nodes, so
    the children are never null: the fix is an annotation (`root.left!.val`), not
    a runtime null check that could never fire.
-6. `LC0642` - no namespace; `currentQuery += c` in a loop is O(n^2);
+5. `LC0642` - no namespace; `currentQuery += c` in a loop is O(n^2);
    `currNode` is non-nullable but assigned `null`.
-7. `LC0021`, `LC0094`, `LC0144` - signatures declared non-nullable while the
+6. `LC0021`, `LC0094`, `LC0144` - signatures declared non-nullable while the
    code and tests pass and return `null`.
-8. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
+7. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
    the input grid; the iterative baseline in the benchmarks project shows the
    alternative.
-9. `LC0094`, `LC0144` - `ref List<int>` is unnecessary for a reference type;
+8. `LC0094`, `LC0144` - `ref List<int>` is unnecessary for a reference type;
    private methods `inOrder` / `preOrder` should be PascalCase.
-10. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
-    special-cased in `LC0007` but never tested.
-11. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
+9. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
+   special-cased in `LC0007` but never tested.
+10. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
     benchmarks README is still a placeholder.
 
 ## Done
 
+- CI on GitHub Actions: `.github/workflows/ci.yml` restores, builds and tests
+  on every push and pull request to `main`. Benchmarks are deliberately not run
+  there - shared runners produce meaningless nanosecond numbers.
 - Benchmarks split out of the test project into
   `benchmarks/LeetCode.Benchmarks` (they had been silently breaking the build).
 - Root `README.md` with the problem index, complexity per solution, build
