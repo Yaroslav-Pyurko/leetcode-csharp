@@ -1,9 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+  <!-- TargetFramework, ImplicitUsings, Nullable and TreatWarningsAsErrors come
+       from Directory.Build.props at the repository root. -->
 
 </Project>

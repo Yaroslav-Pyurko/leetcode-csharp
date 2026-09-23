@@ -1,0 +1,15 @@
+<Project>
+
+  <!-- MSBuild imports this file into every project below it, before the project
+       itself is evaluated. Anything set here is the default for all three
+       projects, so it is written once instead of three times. -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>

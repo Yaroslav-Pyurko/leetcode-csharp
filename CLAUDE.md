@@ -168,13 +168,11 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
 
 1. `Directory.Build.props` holding the properties currently duplicated across
    all three csproj files (`TargetFramework`, `ImplicitUsings`, `Nullable`),
-   plus `TreatWarningsAsErrors`. Note that `Nullable` is *already* enabled, so
-   items 4-6 below are warnings the compiler emits today and nobody reads;
-   `TreatWarningsAsErrors` adds no analysis, it only stops the ignoring.
-   Expect **at least 20** diagnostics across 9 files. An earlier estimate here
-   said 8-12; that counted the solution files and badly undercounted the test
-   project, where every `TreeBuilder.Build(...)` result feeds a non-nullable
-   parameter. Still bounded, but plan for an afternoon, not ten minutes.
+   plus `TreatWarningsAsErrors`. **The build is warning-free as of the nullable
+   signature fix**, so the strictness flag now lands clean rather than surfacing
+   a pile of work - the 21 diagnostics that used to stand in the way are gone.
+   That turns this from an afternoon into ten minutes, and the sooner it lands
+   the sooner a newly introduced warning stops being ignorable.
 
    Two traps: adding `GenerateDocumentationFile` also turns on **CS1591**
    ("missing XML comment for publicly visible member"), which would demand a doc
@@ -191,23 +189,16 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
    Known cases: `LC0198` opens with `nums == null || nums.Length == 0` though
    `1 <= nums.length`; `LC0200` opens with `grid == null || grid.Length == 0`
    though `1 <= m, n`. Delete rather than keep.
-4. `LC2236` - dereferences `root.left` / `root.right`, which the compiler flags
-   under nullable. Note the constraints say the tree has exactly three nodes, so
-   the children are never null: the fix is an annotation (`root.left!.val`), not
-   a runtime null check that could never fire.
-5. `LC0642` - no namespace; `currentQuery += c` in a loop is O(n^2);
-   `currNode` is non-nullable but assigned `null`.
-6. `LC0021`, `LC0094`, `LC0144` - signatures declared non-nullable while the
-   code and tests pass and return `null`.
-7. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
+4. `LC0642` - no namespace, so the class sits in the global one while every
+   other solution is in `LeetCode`; and `currentQuery += c` inside `Input` is
+   O(n^2) string building where a `StringBuilder` belongs.
+5. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
    the input grid; the iterative baseline in the benchmarks project shows the
    alternative.
-8. `LC0094`, `LC0144` - `ref List<int>` is unnecessary for a reference type;
-   private methods `inOrder` / `preOrder` should be PascalCase.
-9. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
+6. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
    special-cased in `LC0007` but never tested.
-10. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
-    benchmarks README is still a placeholder.
+7. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
+   benchmarks README is still a placeholder.
 
 ## Done
 
@@ -222,6 +213,14 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
   rolling pair - all three were asymptotically worse than the problem intended.
 - `LC0509` benchmarked against two community variants; results and analysis are
   in the benchmarks README.
+- Nullable signatures corrected across `LC0021`, `LC0094`, `LC0144`, `LC2236`
+  and `LC0642`, taking the build from 21 warnings to zero. Each change follows
+  the problem's constraints rather than silencing the analyser: LC0094 and
+  LC0144 accept `[0, 100]` nodes and LC0021 accepts `[0, 50]`, so `null` is a
+  legal argument and the parameters say so; LC2236 has exactly three nodes, so
+  its children use `!`. Fixing the two public tree signatures alone cleared 12
+  of the 21. The same pass dropped the needless `ref List<int>` and renamed
+  `inOrder` / `preOrder` to PascalCase.
 - `LC0014` rewritten from sort-then-compare to a vertical scan: it no longer
   reorders the caller's array, no longer discards whitespace-only elements, and
   drops from O(m * n log n) to O(n * m). The solution and its test rows were then
