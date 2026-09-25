@@ -73,7 +73,11 @@ lowercase field names (`val`, `next`, `left`, `right`). Do not "fix" those.
 `LC0642_DesignSearchAutocompleteSystem` currently has no namespace at all. That
 is a known defect, not a pattern to copy.
 
-Style: block-scoped namespaces, Allman braces, four spaces. Test methods read
+Style is defined by the root `.editorconfig`: file-scoped namespaces (existing
+files are still block-scoped, see the backlog), Allman braces, four spaces,
+`_camelCase` private fields, `s_camelCase` private static fields, `var` everywhere
+(the owner's preference). `Baselines/` is marked `generated_code` there, so style
+rules never flag the verbatim copies. Test methods read
 `Method_Scenario_ExpectedResult`; several older files predate that and are on the
 backlog.
 
@@ -184,7 +188,11 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
 
    Land it as two commits: deduplication first (no behaviour change), the
    strictness flag second, so it can be reverted on its own.
-2. Root `.editorconfig`.
+2. Convert every file to file-scoped namespaces (IDE0161, one "Fix all in
+   Solution" in Visual Studio). After that, decide on `EnforceCodeStyleInBuild`:
+   until it is on, the `.editorconfig` severities show only in the IDE and the
+   build ignores them. With `TreatWarningsAsErrors` every style `warning` would
+   then fail the build, so land it only once the IDE shows none.
 3. Audit the guards that the constraints make unreachable, per the rule above.
    Known cases: `LC0198` opens with `nums == null || nums.Length == 0` though
    `1 <= nums.length`; `LC0200` opens with `grid == null || grid.Length == 0`
@@ -202,6 +210,10 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
 
 ## Done
 
+- Root `.editorconfig` with the full code style, merged from the former
+  `my_defaul_style.editorconfig` and modernised (file-scoped namespaces, C# 12-13
+  options, `_camelCase` / `s_camelCase` fields). Charset follows the repo:
+  UTF-8 with BOM for `.cs` and `.csproj`, without BOM for everything else.
 - CI on GitHub Actions: `.github/workflows/ci.yml` restores, builds and tests
   on every push and pull request to `main`. Benchmarks are deliberately not run
   there - shared runners produce meaningless nanosecond numbers.
