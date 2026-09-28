@@ -1,23 +1,26 @@
-﻿namespace LeetCode
+﻿namespace LeetCode;
+
+public class LC0009_PalindromeNumber
 {
-    public class LC0009_PalindromeNumber
+    public bool IsPalindrome(int x)
     {
-        public bool IsPalindrome(int x)
+        if (0 <= x && x <= 9)
         {
-            if (0 <= x && x <= 9)
-                return true;
-
-            if (x < 0 || (x % 10 == 0 && x != 0))
-                return false;
-
-            int reversedHalf = 0;
-            while (x > reversedHalf)
-            {
-                reversedHalf = reversedHalf * 10 + x % 10;
-                x /= 10;
-            }
-
-            return x == reversedHalf || x == reversedHalf / 10;
+            return true;
         }
+
+        if (x < 0 || (x % 10 == 0 && x != 0))
+        {
+            return false;
+        }
+
+        int reversedHalf = 0;
+        while (x > reversedHalf)
+        {
+            reversedHalf = reversedHalf * 10 + x % 10;
+            x /= 10;
+        }
+
+        return x == reversedHalf || x == reversedHalf / 10;
     }
 }
