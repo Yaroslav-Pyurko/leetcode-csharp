@@ -1,22 +1,23 @@
-﻿namespace LeetCode
+﻿namespace LeetCode;
+
+public class LC0001_TwoSum
 {
-    public class LC0001_TwoSum
+    public int[] TwoSum(int[] nums, int target)
     {
-        public int[] TwoSum(int[] nums, int target)
+        var map = new Dictionary<int, int>();
+
+        for (int i = 0; i < nums.Length; i++)
         {
-            var map = new Dictionary<int, int>();
+            int diff = target - nums[i];
 
-            for (int i = 0; i < nums.Length; i++)
+            if (map.TryGetValue(diff, out var idx))
             {
-                int diff = target - nums[i];
-
-                if (map.TryGetValue(diff, out var idx))
-                    return [idx, i];
-
-                map[nums[i]] = i;
+                return [idx, i];
             }
 
-            return [];
+            map[nums[i]] = i;
         }
+
+        return [];
     }
 }
