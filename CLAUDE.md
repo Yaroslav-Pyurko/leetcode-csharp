@@ -170,46 +170,63 @@ and makes the comment malformed (CS1570, currently invisible because
 
 Reviewed and accepted, not yet done. Roughly in order of leverage:
 
-1. `Directory.Build.props` holding the properties currently duplicated across
-   all three csproj files (`TargetFramework`, `ImplicitUsings`, `Nullable`),
-   plus `TreatWarningsAsErrors`. **The build is warning-free as of the nullable
-   signature fix**, so the strictness flag now lands clean rather than surfacing
-   a pile of work - the 21 diagnostics that used to stand in the way are gone.
-   That turns this from an afternoon into ten minutes, and the sooner it lands
-   the sooner a newly introduced warning stops being ignorable.
-
-   Two traps: adding `GenerateDocumentationFile` also turns on **CS1591**
-   ("missing XML comment for publicly visible member"), which would demand a doc
-   comment on every public member - the opposite of the rule above, and an
-   instant build failure under `TreatWarningsAsErrors`. Pair it with
-   `<NoWarn>$(NoWarn);CS1591</NoWarn>`. And do not add `EnforceCodeStyleInBuild`
-   or `AnalysisLevel` at the same time; those raise hundreds of IDE#### style
-   diagnostics and are a separate decision.
-
-   Land it as two commits: deduplication first (no behaviour change), the
-   strictness flag second, so it can be reverted on its own.
-2. Convert every file to file-scoped namespaces (IDE0161, one "Fix all in
+1. Convert every file to file-scoped namespaces (IDE0161, one "Fix all in
    Solution" in Visual Studio). After that, decide on `EnforceCodeStyleInBuild`:
    until it is on, the `.editorconfig` severities show only in the IDE and the
    build ignores them. With `TreatWarningsAsErrors` every style `warning` would
    then fail the build, so land it only once the IDE shows none.
-3. Audit the guards that the constraints make unreachable, per the rule above.
-   Known cases: `LC0198` opens with `nums == null || nums.Length == 0` though
-   `1 <= nums.length`; `LC0200` opens with `grid == null || grid.Length == 0`
-   though `1 <= m, n`. Delete rather than keep.
-4. `LC0642` - no namespace, so the class sits in the global one while every
+
+   Counted on 2026-10-02, the outstanding style debt is about 36 items and
+   almost all of it is mechanical:
+
+   - IDE0161 file-scoped namespace: 21 of 24 files (20 block-scoped, plus
+     `LC0642` which has no namespace at all).
+   - IDE0011 braces: 11 single-statement `if` bodies, in `LC0007`, `LC0026`,
+     `LC0198`, `LC0242`, `LC0859` and `TreeBuilder`. Four of them disappear by
+     themselves once the dead guards in item 2 are deleted.
+   - IDE1006 private field naming and IDE0044 readonly: all in `LC0642` -
+     `root`, `currNode` and `currentQuery` need the `_` prefix, and `root` is
+     never reassigned. Doing item 3 clears these too.
+2. Audit the guards that the constraints make unreachable, per the rule above.
+   Verified against the published constraints, all four are dead code:
+
+   - `LC0198`: `nums == null || nums.Length == 0` and also
+     `nums.Length == 1` - constraint is `1 <= nums.length <= 100`, and the
+     rolling-pair loop already returns `nums[0]` correctly for one element, so
+     both lines go.
+   - `LC0020`: `s.Length == 0` - constraint is `1 <= s.length <= 10^4`, and the
+     final `stack.Count == 0` would return `true` for it anyway.
+   - `LC0026`: `nums.Length == 0` - constraint is `1 <= nums.length <= 3*10^4`.
+   - `LC0200`: `grid == null || grid.Length == 0 || grid[0].Length == 0` -
+     constraint is `1 <= m, n <= 300`.
+
+   **Do not touch `LC0007`'s `if (x == int.MinValue) return 0;`** - it looks like
+   the same pattern but its constraint is `-2^31 <= x <= 2^31 - 1`, so
+   `int.MinValue` is a legal input and the guard is load-bearing.
+
+   Unrelated to constraints but in the same sweep: `LC0009` opens with
+   `if (0 <= x && x <= 9) return true;`, which the main path already handles
+   correctly for 0-9.
+3. `LC0642` - no namespace, so the class sits in the global one while every
    other solution is in `LeetCode`; and `currentQuery += c` inside `Input` is
    O(n^2) string building where a `StringBuilder` belongs.
-5. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
+4. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
    the input grid; the iterative baseline in the benchmarks project shows the
    alternative.
-6. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
+5. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
    special-cased in `LC0007` but never tested.
-7. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
+6. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
    benchmarks README is still a placeholder.
 
 ## Done
 
+- `Directory.Build.props` at the root carries `TargetFramework`,
+  `ImplicitUsings`, `Nullable`, `IsPackable` and `TreatWarningsAsErrors` for all
+  three projects; the csproj files keep only what is genuinely theirs, and
+  `src/LeetCode/LeetCode.csproj` is now empty apart from a pointer comment.
+  Zero warnings is an enforced invariant rather than a snapshot.
+- Root `.editorconfig` with 13 IDE rules raised to `warning`. Note these are
+  IDE-only until `EnforceCodeStyleInBuild` lands - see item 1.
 - Root `.editorconfig` with the full code style, merged from the former
   `my_defaul_style.editorconfig` and modernised (file-scoped namespaces, C# 12-13
   options, `_camelCase` / `s_camelCase` fields). Charset follows the repo:
