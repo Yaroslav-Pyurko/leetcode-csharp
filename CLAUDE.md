@@ -153,6 +153,11 @@ and makes the comment malformed (CS1570, currently invisible because
 `GenerateDocumentationFile` is off). Prefer phrasing that avoids the character -
 "the range [0, 30]" rather than "0 &lt;= n &lt;= 30".
 
+Before adding or bumping a package, check its nuget.org page for a deprecation
+notice. The `xunit` 2.x reference in this repository sat there for months while
+being formally deprecated, and the original review listed the package versions
+without ever looking.
+
 ## Benchmarks
 
 - `Baselines/` holds implementations kept only for comparison, copied
@@ -207,15 +212,40 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
    Unrelated to constraints but in the same sweep: `LC0009` opens with
    `if (0 <= x && x <= 9) return true;`, which the main path already handles
    correctly for 0-9.
-3. `LC0642` - no namespace, so the class sits in the global one while every
+3. Migrate the test project from xUnit v2 to v3. The `xunit` 2.x meta-package is
+   formally **deprecated** on nuget.org - "legacy and no longer maintained",
+   security fixes only - which is why Visual Studio shows it struck through.
+   Nothing is broken, so this is not urgent, but v2 gets no further work.
+
+   The smaller of the two migration paths keeps VSTest and so keeps
+   `dotnet test`, the CI workflow and `coverlet.collector` working unchanged:
+
+   - `xunit` 2.9.3 -> `xunit.v3` (its version numbering is confusing: the
+     package is named v3 but the current release is 4.0.1).
+   - `xunit.runner.visualstudio` needs >= 3.0.0; 3.1.4 already qualifies.
+   - Keep `Microsoft.NET.Test.Sdk` and `coverlet.collector`.
+   - Add `<OutputType>Exe</OutputType>` - v3 test projects are self-executing,
+     and `Library` is the default.
+
+   The other path swaps VSTest for Microsoft Testing Platform (`xunit.v3.mtp-v2`,
+   dropping Test.Sdk and runner.visualstudio). Do not take it: coverlet.collector
+   is a VSTest data collector and would stop working.
+
+   **Expect the build to break on the first attempt.** `TreatWarningsAsErrors` is
+   on, and the v3 analysers are stricter. The likely offenders are
+   `LC0200_NumberOfIslandsTests` and `LC0642_DesignSearchAutocompleteSystemTests`,
+   whose `MemberData` sources return untyped `IEnumerable<object[]>`; newer
+   xunit.analyzers flag that (xUnit1042-family) and the fix is `TheoryData<...>`.
+   Land the migration as its own commit so it can be reverted cleanly.
+4. `LC0642` - no namespace, so the class sits in the global one while every
    other solution is in `LeetCode`; and `currentQuery += c` inside `Input` is
    O(n^2) string building where a `StringBuilder` belongs.
-4. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
+5. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
    the input grid; the iterative baseline in the benchmarks project shows the
    alternative.
-5. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
+6. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
    special-cased in `LC0007` but never tested.
-6. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
+7. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
    benchmarks README is still a placeholder.
 
 ## Done
