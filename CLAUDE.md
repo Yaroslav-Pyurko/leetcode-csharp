@@ -153,11 +153,6 @@ and makes the comment malformed (CS1570, currently invisible because
 `GenerateDocumentationFile` is off). Prefer phrasing that avoids the character -
 "the range [0, 30]" rather than "0 &lt;= n &lt;= 30".
 
-Before adding or bumping a package, check its nuget.org page for a deprecation
-notice. The `xunit` 2.x reference in this repository sat there for months while
-being formally deprecated, and the original review listed the package versions
-without ever looking.
-
 ## Benchmarks
 
 - `Baselines/` holds implementations kept only for comparison, copied
@@ -212,55 +207,63 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
    Unrelated to constraints but in the same sweep: `LC0009` opens with
    `if (0 <= x && x <= 9) return true;`, which the main path already handles
    correctly for 0-9.
-3. Migrate the test project from xUnit v2 to v3. The `xunit` 2.x meta-package is
-   formally **deprecated** on nuget.org - "legacy and no longer maintained",
-   security fixes only - which is why Visual Studio shows it struck through.
-   Nothing is broken, so this is not urgent, but v2 gets no further work.
-
-   The smaller of the two migration paths keeps VSTest and so keeps
-   `dotnet test`, the CI workflow and `coverlet.collector` working unchanged:
-
-   - `xunit` 2.9.3 -> `xunit.v3` (its version numbering is confusing: the
-     package is named v3 but the current release is 4.0.1).
-   - `xunit.runner.visualstudio` needs >= 3.0.0; 3.1.4 already qualifies.
-   - Keep `Microsoft.NET.Test.Sdk` and `coverlet.collector`.
-   - Add `<OutputType>Exe</OutputType>` - v3 test projects are self-executing,
-     and `Library` is the default.
-
-   The other path swaps VSTest for Microsoft Testing Platform (`xunit.v3.mtp-v2`,
-   dropping Test.Sdk and runner.visualstudio). Do not take it: coverlet.collector
-   is a VSTest data collector and would stop working.
-
-   **Expect the build to break on the first attempt.** `TreatWarningsAsErrors` is
-   on, and the v3 analysers are stricter. The likely offenders are
-   `LC0200_NumberOfIslandsTests` and `LC0642_DesignSearchAutocompleteSystemTests`,
-   whose `MemberData` sources return untyped `IEnumerable<object[]>`; newer
-   xunit.analyzers flag that (xUnit1042-family) and the fix is `TheoryData<...>`.
-   Land the migration as its own commit so it can be reverted cleanly.
-4. `LC0642` - no namespace, so the class sits in the global one while every
+3. `LC0642` - no namespace, so the class sits in the global one while every
    other solution is in `LeetCode`; and `currentQuery += c` inside `Input` is
    O(n^2) string building where a `StringBuilder` belongs.
-5. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
+4. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
    the input grid; the iterative baseline in the benchmarks project shows the
    alternative.
-6. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
+5. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
    special-cased in `LC0007` but never tested.
-7. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
+6. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
    benchmarks README is still a placeholder.
 
 ## Done
 
+- Test project migrated from the deprecated `xunit` 2.9.3 to
+  **`xunit.v3.mtp-off` 4.0.1**. Read that package name before changing it: the
+  plain `xunit.v3` package enables Microsoft Testing Platform and marks the
+  project as an MTP application, which the .NET 10 SDK refuses to run through
+  `dotnet test`:
+
+      error: Testing with VSTest target is no longer supported by
+      Microsoft.Testing.Platform on .NET 10 SDK and later.
+
+  Visual Studio's Test Explorer kept working throughout (it goes through
+  `xunit.runner.visualstudio`), so the breakage was invisible until someone ran
+  `dotnet test` from a shell - and CI runs exactly that. `xunit.v3.mtp-off` is
+  the officially published MTP-free variant at the same version, and it keeps
+  `dotnet test`, the CI workflow and `coverlet.collector` working untouched.
+
+  Moving to MTP properly is a later, larger decision: it needs
+  `"test": { "runner": "Microsoft.Testing.Platform" }` in a `global.json`, and
+  `coverlet.collector` is a VSTest data collector that would have to be replaced
+  by `Microsoft.Testing.Extensions.CodeCoverage`.
+
+  `Microsoft.NET.Test.Sdk`, `xunit.runner.visualstudio` 3.1.4 and
+  `coverlet.collector` all carried over unchanged, and `OutputType=Exe` never
+  had to be added by hand. Two predictions written here beforehand were wrong:
+  that `OutputType` would need adding, and that the stricter v3 analysers plus
+  `TreatWarningsAsErrors` would fail the build over the untyped
+  `IEnumerable<object[]>` MemberData sources. Neither happened.
+
+  **Expected test count is 101** (16 `[Fact]`, 79 `[InlineData]` rows, 6
+  `MemberData` rows). Visual Studio reported 97 under `xunit.v3`, because the
+  five rows of `LC0200`'s method-based `MemberData` could not be pre-enumerated
+  and collapsed into one entry; all five still ran. Converting that source to
+  `TheoryData<char[][], int>` would make them countable again. If the number
+  ever drops without a test being deleted, suspect discovery, not the tests.
 - `Directory.Build.props` at the root carries `TargetFramework`,
   `ImplicitUsings`, `Nullable`, `IsPackable` and `TreatWarningsAsErrors` for all
   three projects; the csproj files keep only what is genuinely theirs, and
   `src/LeetCode/LeetCode.csproj` is now empty apart from a pointer comment.
   Zero warnings is an enforced invariant rather than a snapshot.
-- Root `.editorconfig` with 13 IDE rules raised to `warning`. Note these are
-  IDE-only until `EnforceCodeStyleInBuild` lands - see item 1.
 - Root `.editorconfig` with the full code style, merged from the former
   `my_defaul_style.editorconfig` and modernised (file-scoped namespaces, C# 12-13
   options, `_camelCase` / `s_camelCase` fields). Charset follows the repo:
   UTF-8 with BOM for `.cs` and `.csproj`, without BOM for everything else.
+  13 IDE rules are raised to `warning`, but they are IDE-only until
+  `EnforceCodeStyleInBuild` lands - see item 1.
 - CI on GitHub Actions: `.github/workflows/ci.yml` restores, builds and tests
   on every push and pull request to `main`. Benchmarks are deliberately not run
   there - shared runners produce meaningless nanosecond numbers.
