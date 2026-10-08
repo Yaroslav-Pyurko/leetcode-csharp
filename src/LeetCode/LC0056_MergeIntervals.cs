@@ -1,6 +1,6 @@
 ﻿namespace LeetCode;
 
-internal class LC0056_MergeIntervals
+public class LC0056_MergeIntervals
 {
     public int[][] Merge(int[][] intervals)
     {
