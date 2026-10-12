@@ -2,69 +2,25 @@
 {
     public class LC0200_NumberOfIslandsTests
     {
-        public static IEnumerable<object[]> TestCases()
-        {
-            yield return new object[]
-            {
-                new char[][]
-                {
-                    new[] { '1', '1', '1', '1', '0' },
-                    new[] { '1', '1', '0', '1', '0' },
-                    new[] { '1', '1', '0', '0', '0' },
-                    new[] { '0', '0', '0', '0', '0' }
-                },
-                1
-            };
-
-            yield return new object[]
-            {
-                new char[][]
-                {
-                    new[] { '1', '1', '0', '0', '0' },
-                    new[] { '1', '1', '0', '0', '0' },
-                    new[] { '0', '0', '1', '0', '0' },
-                    new[] { '0', '0', '0', '1', '1' }
-                },
-                3
-            };
-
-            // Edge case: single cell, land
-            yield return new object[]
-            {
-                new char[][]
-                {
-                    new[] { '1' }
-                },
-                1
-            };
-
-            // Edge case: single cell, water
-            yield return new object[]
-            {
-                new char[][]
-                {
-                    new[] { '0' }
-                },
-                0
-            };
-
-            // Edge case: all water
-            yield return new object[]
-            {
-                new char[][]
-                {
-                    new[] { '0', '0' },
-                    new[] { '0', '0' }
-                },
-                0
-            };
-        }
-
         [Theory]
-        [MemberData(nameof(TestCases))]
-        public void NumIslands_ReturnsExpectedCount(char[][] grid, int expected)
+        [InlineData(new[] {
+            "11110",
+            "11010",
+            "11000",
+            "00000"
+            }, 1)]
+        [InlineData(new[] {
+            "11000",
+            "11000",
+            "00100",
+            "00011"
+            }, 3)]
+        [InlineData(new[] { "1" }, 1)]
+        [InlineData(new[] { "0" }, 0)]
+        [InlineData(new[] { "00", "00" }, 0)]
+        public void NumIslands_ReturnsExpectedCount(string[] rows, int expected)
         {
-            // Local instantiation for behavioral isolation
+            var grid = rows.Select(row => row.ToCharArray()).ToArray();
             var solution = new LC0200_NumberOfIslands();
 
             var actual = solution.NumIslands(grid);
