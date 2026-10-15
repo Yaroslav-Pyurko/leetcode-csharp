@@ -4,14 +4,29 @@ public class LC0056_MergeIntervals
 {
     public int[][] Merge(int[][] intervals)
     {
-        for (int i = 0; i < intervals.Length; i++)
+        if (intervals == null || intervals.Length == 0)
         {
-            for (int j = 0; j < intervals[i].Length; j++)
+            return new int[0][];
+        }
+
+        Array.Sort(intervals, (a, b) => a[0].CompareTo(b[0]));
+
+        var merged = new List<int[]>();
+
+        foreach (var interval in intervals)
+        {
+            var noOverlap = merged.Count == 0 || merged[^1][1] < interval[0];
+            var overlap = !noOverlap;
+            if (overlap)
             {
-                // Process each interval
+                merged[^1][1] = Math.Max(merged[^1][1], interval[1]);
+            }
+            else
+            {
+                merged.Add(new int[] { interval[0], interval[1] });
             }
         }
 
-        return result;
+        return merged.ToArray();
     }
 }
