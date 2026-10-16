@@ -2,28 +2,38 @@
 
 public class LC0056_MergeIntervals
 {
+    private const int MaxCoordinate = 10_000;
+    private const int NoIntervalStartsHere = -1;
+
     public int[][] Merge(int[][] intervals)
     {
-        if (intervals == null || intervals.Length == 0)
-        {
-            return new int[0][];
-        }
-
-        Array.Sort(intervals, (a, b) => a[0].CompareTo(b[0]));
-
-        var merged = new List<int[]>();
+        var furthestEndByStart = new int[MaxCoordinate + 1];
+        Array.Fill(furthestEndByStart, NoIntervalStartsHere);
 
         foreach (var interval in intervals)
         {
-            var noOverlap = merged.Count == 0 || merged[^1][1] < interval[0];
-            var overlap = !noOverlap;
-            if (overlap)
+            var start = interval[0];
+            furthestEndByStart[start] = Math.Max(furthestEndByStart[start], interval[1]);
+        }
+
+        var merged = new List<int[]>();
+
+        for (var start = 0; start <= MaxCoordinate; start++)
+        {
+            var end = furthestEndByStart[start];
+            if (end == NoIntervalStartsHere)
             {
-                merged[^1][1] = Math.Max(merged[^1][1], interval[1]);
+                continue;
+            }
+
+            var overlapsLast = merged.Count > 0 && start <= merged[^1][1];
+            if (overlapsLast)
+            {
+                merged[^1][1] = Math.Max(merged[^1][1], end);
             }
             else
             {
-                merged.Add(new int[] { interval[0], interval[1] });
+                merged.Add([start, end]);
             }
         }
 
