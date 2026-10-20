@@ -37,15 +37,29 @@ dotnet run -c Release --project benchmarks/LeetCode.Benchmarks -- --filter *
 names the referenced `LeetCode` assembly rather than the configuration, which
 reads as a different problem than it is. See the benchmarks README.
 
-## You cannot build or run anything here
+## Building and testing from the cloud container
 
 The repository lives on the user's Windows machine and is reached through the
-device bridge. The cloud container has **no .NET SDK**. So:
+device bridge. The container starts with **no .NET SDK**, and nuget.org is
+blocked by its network policy, but a build is still possible:
 
-- Verify logic by reasoning, or by re-implementing the algorithm in Python and
-  checking it against known values. Do that before claiming an algorithm works.
-- Ask the user to run `dotnet build` / `dotnet test` and report back.
-- Never state that code compiles or that tests pass. You have not seen either.
+- `apt-get install dotnet-sdk-10.0` works (Ubuntu's own package; Microsoft's
+  download sites are blocked).
+- Packages come from the owner's cache, `C:\Users\Yaroslav\.nuget\packages`.
+  `tests/LeetCode.Tests/obj/project.assets.json` lists exactly which `.nupkg`
+  files the test project needs (18 as of 2026-10-15). Stage them into one
+  folder and point a `nuget.config` with `<clear/>` at it.
+- Stage the sources into a scratch copy of the repo and run `dotnet test` there.
+  Never write `nuget.config` or build output back to the device.
+
+The SDK and the staged copy live only as long as the session. Benchmarks need
+BenchmarkDotNet and a long tail of dependencies and have not been set up this
+way; for a quick comparison a throwaway Stopwatch console in the scratchpad is
+enough, and real numbers still come from the owner's machine.
+
+State that code compiles or that tests pass only if you ran them in this
+session; otherwise verify by reasoning or a Python re-implementation, and ask
+the user to run `dotnet test`.
 
 Files written back to the device must keep the repo's encoding: **UTF-8 with BOM
 and CRLF** for `.cs` and `.csproj`, CRLF without BOM for `.md` and `.slnx`.
@@ -247,12 +261,12 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
   `TreatWarningsAsErrors` would fail the build over the untyped
   `IEnumerable<object[]>` MemberData sources. Neither happened.
 
-  **Expected test count is 101** (16 `[Fact]`, 79 `[InlineData]` rows, 6
-  `MemberData` rows). Visual Studio reported 97 under `xunit.v3`, because the
-  five rows of `LC0200`'s method-based `MemberData` could not be pre-enumerated
-  and collapsed into one entry; all five still ran. Converting that source to
-  `TheoryData<char[][], int>` would make them countable again. If the number
-  ever drops without a test being deleted, suspect discovery, not the tests.
+  **Expected test count is 110** (as of 2026-10-15). Tests whose input is a
+  jagged array (`int[][]`, `char[][]`) pass it as strings - JSON in `LC0056`,
+  one string per row in `LC0200` - because xUnit v3 cannot serialise jagged
+  arrays, and a `MemberData` source built from them collapses into a single
+  entry in Test Explorer (all rows still run). If the number ever drops without
+  a test being deleted, suspect discovery, not the tests.
 - `Directory.Build.props` at the root carries `TargetFramework`,
   `ImplicitUsings`, `Nullable`, `IsPackable` and `TreatWarningsAsErrors` for all
   three projects; the csproj files keep only what is genuinely theirs, and
@@ -283,6 +297,11 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
   its children use `!`. Fixing the two public tree signatures alone cleared 12
   of the 21. The same pass dropped the needless `ref List<int>` and renamed
   `inOrder` / `preOrder` to PascalCase.
+- `LC0056` replaced sort-then-sweep with counting by start coordinate, which
+  the bound `0 <= start <= end <= 10^4` allows: O(n + 10^4) instead of
+  O(n log n). It always pays the fixed 10^4 scan, so on small inputs the sort
+  was faster; a rough Stopwatch run put it at about 5x faster at n = 10^4,
+  break-even near n = 1000.
 - `LC0014` rewritten from sort-then-compare to a vertical scan: it no longer
   reorders the caller's array, no longer discards whitespace-only elements, and
   drops from O(m * n log n) to O(n * m). The solution and its test rows were then
