@@ -9,16 +9,11 @@ public class LC0042_TrappingRainWaterTests
     [InlineData(
         new int[] { 4, 2, 0, 3, 2, 5 },
         9)]
-    public void Trap_ReturnsExpectedResult(int[] map, int expected)
+    public void Trap_ReturnsExpectedResult(int[] height, int expected)
     {
-        // todo
-        var result = map;
-        var actual = expected;
+        var solution = new LC0042_TrappingRainWater();
 
-        //var intervals = JsonSerializer.Deserialize<int[]>(mapJson);
-        //var solution = new LC0042_TrappingRainWater(); 
-
-        //var actual = solution.Trap(intervals);
+        var actual = solution.Trap(height);
 
         Assert.Equal(expected, actual);
     }
