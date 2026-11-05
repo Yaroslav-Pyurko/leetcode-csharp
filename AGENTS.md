@@ -261,7 +261,7 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
   `TreatWarningsAsErrors` would fail the build over the untyped
   `IEnumerable<object[]>` MemberData sources. Neither happened.
 
-  **Expected test count is 110** (as of 2026-10-15). Tests whose input is a
+  **Expected test count is 121** (as of 2026-11-05). Tests whose input is a
   jagged array (`int[][]`, `char[][]`) pass it as strings - JSON in `LC0056`,
   one string per row in `LC0200` - because xUnit v3 cannot serialise jagged
   arrays, and a `MemberData` source built from them collapses into a single
@@ -301,7 +301,14 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
   the bound `0 <= start <= end <= 10^4` allows: O(n + 10^4) instead of
   O(n log n). It always pays the fixed 10^4 scan, so on small inputs the sort
   was faster; a rough Stopwatch run put it at about 5x faster at n = 10^4,
-  break-even near n = 1000.
+  break-even near n = 1000. It was then replaced again by a sweep line over
+  per-point open/close counts sized to the largest end, which writes the result
+  into the input array instead of allocating; at most as slow as the counting
+  version, and much faster when coordinates are small.
+- `LC0042` added: two pointers advancing from the side with the smaller running
+  maximum, O(n) time and O(1) space. `Trap_TallestWallsAroundLongestValley_FitsInInt`
+  pins that the largest answer the constraints allow, (2*10^4 - 2) * 10^5, fits
+  in `int`.
 - `LC0014` rewritten from sort-then-compare to a vertical scan: it no longer
   reorders the caller's array, no longer discards whitespace-only elements, and
   drops from O(m * n log n) to O(n * m). The solution and its test rows were then
