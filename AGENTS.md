@@ -10,8 +10,9 @@ avoiding. Do not let this file drift - a stale CLAUDE.md is worse than none.
 
 ## What this is
 
-LeetCode solutions in C#, targeting .NET 10. Three projects, wired together by
-`LeetCode.slnx`:
+LeetCode solutions in C#, targeting .NET 11 (moved from .NET 10 on 2026-11-17;
+the TFM is set only in `Directory.Build.props`). Three projects, wired together
+by `LeetCode.slnx`:
 
 | Path | What |
 |---|---|
@@ -44,7 +45,9 @@ device bridge. The container starts with **no .NET SDK**, and nuget.org is
 blocked by its network policy, but a build is still possible:
 
 - `apt-get install dotnet-sdk-10.0` works (Ubuntu's own package; Microsoft's
-  download sites are blocked).
+  download sites are blocked). As of 2026-11-17 Ubuntu 24.04 has **no
+  `dotnet-sdk-11.0`** package, so the container cannot build the `net11.0`
+  projects; ask the owner to build and test locally until one appears.
 - Packages come from the owner's cache, `C:\Users\Yaroslav\.nuget\packages`.
   `tests/LeetCode.Tests/obj/project.assets.json` lists exactly which `.nupkg`
   files the test project needs (18 as of 2026-10-15). Stage them into one

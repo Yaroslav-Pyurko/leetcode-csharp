@@ -1,6 +1,6 @@
 # leetcode-csharp
 
-LeetCode solutions in C# on .NET 10. One class per problem in `src/LeetCode`,
+LeetCode solutions in C# on .NET 11. One class per problem in `src/LeetCode`,
 one xUnit test file per solution in `tests/LeetCode.Tests`.
 
 **20 solved:** 15 Easy, 4 Medium, 1 Hard.
