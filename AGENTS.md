@@ -199,8 +199,11 @@ Reviewed and accepted, not yet done. Roughly in order of leverage:
    Counted on 2026-10-02, the outstanding style debt is about 36 items and
    almost all of it is mechanical:
 
-   - IDE0161 file-scoped namespace: 21 of 24 files (20 block-scoped, plus
-     `LC0642` which has no namespace at all).
+   - IDE0161 file-scoped namespace: 21 of 26 source files (20 block-scoped,
+     plus `LC0642` which has no namespace at all). Recounted 2026-11-18: the
+     figure has not moved since 2026-10-02 because new solutions are written
+     file-scoped from the start - the debt is the existing files, and it is not
+     growing.
    - IDE0011 braces: 11 single-statement `if` bodies, in `LC0007`, `LC0026`,
      `LC0198`, `LC0242`, `LC0859` and `TreeBuilder`. Four of them disappear by
      themselves once the dead guards in item 2 are deleted.
