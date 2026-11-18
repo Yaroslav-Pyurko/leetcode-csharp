@@ -45,9 +45,12 @@ device bridge. The container starts with **no .NET SDK**, and nuget.org is
 blocked by its network policy, but a build is still possible:
 
 - `apt-get install dotnet-sdk-10.0` works (Ubuntu's own package; Microsoft's
-  download sites are blocked). As of 2026-11-17 Ubuntu 24.04 has **no
-  `dotnet-sdk-11.0`** package, so the container cannot build the `net11.0`
-  projects; ask the owner to build and test locally until one appears.
+  download sites are blocked). That covers .NET 10 only. Canonical ships STS
+  releases (9, 11) to LTS Ubuntu **only through `ppa:dotnet/backports`**, never
+  the main archive, so `dotnet-sdk-11.0` will not appear in noble by waiting.
+  The PPA host `ppa.launchpadcontent.net` is blocked by the container's network
+  policy (checked 2026-11-17). Until the owner allows that domain, the container
+  cannot build the `net11.0` projects: ask him to build and test locally.
 - Packages come from the owner's cache, `C:\Users\Yaroslav\.nuget\packages`.
   `tests/LeetCode.Tests/obj/project.assets.json` lists exactly which `.nupkg`
   files the test project needs (18 as of 2026-10-15). Stage them into one
