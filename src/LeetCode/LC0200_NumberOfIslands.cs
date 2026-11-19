@@ -4,13 +4,6 @@
     {
         public int NumIslands(char[][] grid)
         {
-            if (grid == null ||
-                grid.Length == 0 ||
-                grid[0].Length == 0)
-            { 
-                return 0;
-            }
-
             int cols = grid[0].Length;
             int rows = grid.Length;
             int numIslands = 0;

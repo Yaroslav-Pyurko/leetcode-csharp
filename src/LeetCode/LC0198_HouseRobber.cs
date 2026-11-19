@@ -4,8 +4,6 @@
     {
         public int Rob(int[] nums)
         {
-            if (nums == null || nums.Length == 0) return 0;
-            if (nums.Length == 1) return nums[0];
             int prev1 = 0; // Max money that can be robbed up to the previous house
             int prev2 = 0; // Max money that can be robbed up to the house before the previous house
             foreach (var num in nums)

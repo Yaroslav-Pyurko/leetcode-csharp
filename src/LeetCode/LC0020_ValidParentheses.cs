@@ -4,10 +4,6 @@
     {
         public bool IsValid(string s)
         {
-            if (s.Length == 0)
-            {
-                return true;
-            }
             if (s.Length % 2 != 0)
             {
                 return false;
