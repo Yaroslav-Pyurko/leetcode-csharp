@@ -1,46 +1,45 @@
-﻿namespace LeetCode
+﻿namespace LeetCode;
+
+public class LC0020_ValidParentheses
 {
-    public class LC0020_ValidParentheses
+    public bool IsValid(string s)
     {
-        public bool IsValid(string s)
+        if (s.Length % 2 != 0)
         {
-            if (s.Length % 2 != 0)
+            return false;
+        }
+
+        var chars = s.ToCharArray();
+        var stack = new Stack<char>();
+
+        for (int i = 0; i < chars.Length; i++)
+        {
+            var curChar = chars[i];
+            if (curChar == '(' || curChar == '{' || curChar == '[')
             {
-                return false;
+                stack.Push(curChar);
             }
-
-            var chars = s.ToCharArray();
-            var stack = new Stack<char>();
-
-            for (int i = 0; i < chars.Length; i++)
+            else
             {
-                var curChar = chars[i];
-                if (curChar == '(' || curChar == '{' || curChar == '[')
+                if (stack.Count == 0)
                 {
-                    stack.Push(curChar);
+                    return false;
+                }
+
+                var lastChar = stack.Peek();
+                if (curChar == ')' && lastChar == '(' ||
+                    curChar == '}' && lastChar == '{' ||
+                    curChar == ']' && lastChar == '['
+                    )
+                {
+                    stack.Pop();
                 }
                 else
                 {
-                    if (stack.Count == 0)
-                    {
-                        return false;
-                    }
-
-                    var lastChar = stack.Peek();
-                    if (curChar == ')' && lastChar == '(' ||
-                        curChar == '}' && lastChar == '{' ||
-                        curChar == ']' && lastChar == '['
-                        )
-                    {
-                        stack.Pop();
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
-            return stack.Count == 0;
         }
+        return stack.Count == 0;
     }
 }

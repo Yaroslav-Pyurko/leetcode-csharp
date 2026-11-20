@@ -1,23 +1,28 @@
-﻿/// <summary>
+﻿using System.Text;
+
+namespace LeetCode;
+
+/// <summary>
 /// aka Japan Dictionary ex SKB Kontur
 /// </summary>
 public class LC0642_DesignSearchAutocompleteSystem
 {
-    private class TrieNode
+    private const char EndOfSentence = '#';
+    private const int SuggestionCount = 3;
+
+    private sealed class TrieNode
     {
-        public Dictionary<char, TrieNode> Children = new Dictionary<char, TrieNode>();
-        public Dictionary<string, int> Counts = new Dictionary<string, int>();
+        public readonly Dictionary<char, TrieNode> Children = [];
+        public readonly Dictionary<string, int> Counts = [];
     }
 
-    private TrieNode root;
-    private TrieNode? currNode;
-    private string currentQuery;
+    private readonly TrieNode _root = new();
+    private readonly StringBuilder _currentQuery = new();
+    private TrieNode? _currentNode;
 
     public LC0642_DesignSearchAutocompleteSystem(string[] sentences, int[] times)
     {
-        root = new TrieNode();
-        currNode = root;
-        currentQuery = "";
+        _currentNode = _root;
 
         for (int i = 0; i < sentences.Length; i++)
         {
@@ -27,49 +32,46 @@ public class LC0642_DesignSearchAutocompleteSystem
 
     public IList<string> Input(char c)
     {
-        // Symbol '#' means the end of the current sentence
-        if (c == '#')
+        if (c == EndOfSentence)
         {
-            Insert(currentQuery, 1);
-            currNode = root;
-            currentQuery = "";
-            return new List<string>();
+            Insert(_currentQuery.ToString(), 1);
+            _currentQuery.Clear();
+            _currentNode = _root;
+            return [];
         }
 
-        currentQuery += c;
+        _currentQuery.Append(c);
 
-        if (currNode == null || !currNode.Children.ContainsKey(c))
+        if (_currentNode is null || !_currentNode.Children.TryGetValue(c, out var next))
         {
-            currNode = null;
-            return new List<string>();
+            _currentNode = null;
+            return [];
         }
 
-        currNode = currNode.Children[c];
+        _currentNode = next;
 
-        return currNode.Counts
-            .OrderByDescending(x => x.Value)
-            .ThenBy(x => x.Key, StringComparer.Ordinal)
-            .Take(3)
-            .Select(x => x.Key)
+        return _currentNode.Counts
+            .OrderByDescending(entry => entry.Value)
+            .ThenBy(entry => entry.Key, StringComparer.Ordinal)
+            .Take(SuggestionCount)
+            .Select(entry => entry.Key)
             .ToList();
     }
 
     private void Insert(string sentence, int count)
     {
-        TrieNode node = root;
+        var node = _root;
+
         foreach (char c in sentence)
         {
-            if (!node.Children.ContainsKey(c))
+            if (!node.Children.TryGetValue(c, out var child))
             {
-                node.Children[c] = new TrieNode();
+                child = new TrieNode();
+                node.Children[c] = child;
             }
-            node = node.Children[c];
 
-            if (!node.Counts.ContainsKey(sentence))
-            {
-                node.Counts[sentence] = 0;
-            }
-            node.Counts[sentence] += count;
+            node = child;
+            node.Counts[sentence] = node.Counts.GetValueOrDefault(sentence) + count;
         }
     }
 }

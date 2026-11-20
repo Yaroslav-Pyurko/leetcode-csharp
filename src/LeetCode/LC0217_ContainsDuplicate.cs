@@ -1,18 +1,17 @@
-﻿namespace LeetCode
+﻿namespace LeetCode;
+
+public class LC0217_ContainsDuplicate
 {
-    public class LC0217_ContainsDuplicate
+    public bool ContainsDuplicate(int[] nums)
     {
-        public bool ContainsDuplicate(int[] nums)
+        var seen = new HashSet<int>(nums.Length);
+        foreach (var n in nums)
         {
-            var seen = new HashSet<int>(nums.Length);
-            foreach (var n in nums)
+            if (!seen.Add(n))
             {
-                if (!seen.Add(n))
-                {
-                    return true;
-                }
+                return true;
             }
-            return false;
         }
+        return false;
     }
 }

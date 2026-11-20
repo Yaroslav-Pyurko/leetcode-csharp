@@ -1,27 +1,26 @@
-﻿namespace LeetCode
+﻿namespace LeetCode;
+
+public class LC0014_LongestCommonPrefix
 {
-    public class LC0014_LongestCommonPrefix
+    public string LongestCommonPrefix(string[] strs)
     {
-        public string LongestCommonPrefix(string[] strs)
+        string candidate = strs[0];
+
+        for (int position = 0; position < candidate.Length; position++)
         {
-            string candidate = strs[0];
+            char expected = candidate[position];
 
-            for (int position = 0; position < candidate.Length; position++)
+            for (int other = 1; other < strs.Length; other++)
             {
-                char expected = candidate[position];
+                string word = strs[other];
 
-                for (int other = 1; other < strs.Length; other++)
+                if (position == word.Length || word[position] != expected)
                 {
-                    string word = strs[other];
-
-                    if (position == word.Length || word[position] != expected)
-                    {
-                        return candidate[..position];
-                    }
+                    return candidate[..position];
                 }
             }
-
-            return candidate;
         }
+
+        return candidate;
     }
 }

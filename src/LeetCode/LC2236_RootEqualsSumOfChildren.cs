@@ -1,12 +1,11 @@
 ﻿using LeetCode.Common;
 
-namespace LeetCode
+namespace LeetCode;
+
+public class LC2236_RootEqualsSumOfChildren
 {
-    public class LC2236_RootEqualsSumOfChildren
+    public bool CheckTree(TreeNode root)
     {
-        public bool CheckTree(TreeNode root)
-        {
-            return root.val == root.left!.val + root.right!.val;
-        }
+        return root.val == root.left!.val + root.right!.val;
     }
 }

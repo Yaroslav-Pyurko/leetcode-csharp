@@ -1,16 +1,15 @@
-﻿namespace LeetCode.Common
+﻿namespace LeetCode.Common;
+
+/// <summary>
+/// Definition for singly-linked list (by LeetCode)
+/// </summary>
+public class ListNode
 {
-    /// <summary>
-    /// Definition for singly-linked list (by LeetCode)
-    /// </summary>
-    public class ListNode
+    public int val;
+    public ListNode? next;
+    public ListNode(int val = 0, ListNode? next = null)
     {
-        public int val;
-        public ListNode? next;
-        public ListNode(int val = 0, ListNode? next = null)
-        {
-            this.val = val;
-            this.next = next;
-        }
+        this.val = val;
+        this.next = next;
     }
 }
