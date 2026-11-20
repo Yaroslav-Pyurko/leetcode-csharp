@@ -48,9 +48,23 @@ blocked by its network policy, but a build is still possible:
   download sites are blocked). That covers .NET 10 only. Canonical ships STS
   releases (9, 11) to LTS Ubuntu **only through `ppa:dotnet/backports`**, never
   the main archive, so `dotnet-sdk-11.0` will not appear in noble by waiting.
-  The PPA host `ppa.launchpadcontent.net` is blocked by the container's network
-  policy (checked 2026-11-17). Until the owner allows that domain, the container
+  Rechecked 2026-11-20: `ppa.launchpadcontent.net` now answers (its
+  `dists/noble/Release` returns 200), so that domain is no longer the blocker.
+  The signing key is: `add-apt-repository` needs `api.launchpad.net`, and
+  `keyserver.ubuntu.com` and `launchpad.net` are refused too, so the PPA cannot
+  be added with a verified key. Do **not** work around this with
+  `[trusted=yes]` - that installs unverified system packages over a proxy this
+  session does not control. Allowing `keyserver.ubuntu.com` is the single
+  change that would unlock `dotnet-sdk-11.0` here. Until then the container
   cannot build the `net11.0` projects: ask him to build and test locally.
+
+  There is also no shell on the owner's machine. The remote-devices bridge
+  exposes listing, staging and committing files plus computer use
+  (screenshot/click/type) - there is no `device_bash`, so commands cannot be run
+  there directly. The one workable route is computer use: open a terminal, type
+  `dotnet test > ci.txt 2>&1`, then read `ci.txt` back through the bridge rather
+  than squinting at screenshots. It needs the owner's per-session approval, so
+  reserve it for jobs with several build-fix-rebuild rounds.
 - Packages come from the owner's cache, `C:\Users\Yaroslav\.nuget\packages`.
   `tests/LeetCode.Tests/obj/project.assets.json` lists exactly which `.nupkg`
   files the test project needs (18 as of 2026-10-15). Stage them into one
@@ -190,59 +204,52 @@ and makes the comment malformed (CS1570, currently invisible because
 
 Reviewed and accepted, not yet done. Roughly in order of leverage:
 
-1. Convert every file to file-scoped namespaces (IDE0161, one "Fix all in
-   Solution" in Visual Studio). After that, decide on `EnforceCodeStyleInBuild`:
-   until it is on, the `.editorconfig` severities show only in the IDE and the
-   build ignores them. With `TreatWarningsAsErrors` every style `warning` would
-   then fail the build, so land it only once the IDE shows none.
+1. Turn on `EnforceCodeStyleInBuild`. This is the last step of the style arc and
+   the reason the namespace conversion was done at all: until it is on, the
+   `.editorconfig` severities show only in the IDE and the build ignores them.
+   With `TreatWarningsAsErrors` already on, every style `warning` then fails the
+   build - which is the point, but it means the switch must be flipped only once
+   the IDE shows none.
 
-   Counted on 2026-10-02, the outstanding style debt is about 36 items and
-   almost all of it is mechanical:
+   Cleared as of 2026-11-20: IDE0161 (0 left, all 47 files converted), IDE0011
+   braces (0 left), IDE0055 trailing whitespace (0 left), IDE1006 and IDE0044
+   (gone with the LC0642 rewrite).
 
-   - IDE0161 file-scoped namespace: 21 of 26 source files (20 block-scoped,
-     plus `LC0642` which has no namespace at all). Recounted 2026-11-18: the
-     figure has not moved since 2026-10-02 because new solutions are written
-     file-scoped from the start - the debt is the existing files, and it is not
-     growing.
-   - IDE0011 braces: 11 single-statement `if` bodies, in `LC0007`, `LC0026`,
-     `LC0198`, `LC0242`, `LC0859` and `TreeBuilder`. Four of them disappear by
-     themselves once the dead guards in item 2 are deleted.
-   - IDE1006 private field naming and IDE0044 readonly: all in `LC0642` -
-     `root`, `currNode` and `currentQuery` need the `_` prefix, and `root` is
-     never reassigned. Doing item 3 clears these too.
-2. Audit the guards that the constraints make unreachable, per the rule above.
-   Verified against the published constraints, all four are dead code:
-
-   - `LC0198`: `nums == null || nums.Length == 0` and also
-     `nums.Length == 1` - constraint is `1 <= nums.length <= 100`, and the
-     rolling-pair loop already returns `nums[0]` correctly for one element, so
-     both lines go.
-   - `LC0020`: `s.Length == 0` - constraint is `1 <= s.length <= 10^4`, and the
-     final `stack.Count == 0` would return `true` for it anyway.
-   - `LC0026`: `nums.Length == 0` - constraint is `1 <= nums.length <= 3*10^4`.
-   - `LC0200`: `grid == null || grid.Length == 0 || grid[0].Length == 0` -
-     constraint is `1 <= m, n <= 300`.
-
-   **Do not touch `LC0007`'s `if (x == int.MinValue) return 0;`** - it looks like
-   the same pattern but its constraint is `-2^31 <= x <= 2^31 - 1`, so
-   `int.MinValue` is a legal input and the guard is load-bearing.
-
-   Unrelated to constraints but in the same sweep: `LC0009` opens with
-   `if (0 <= x && x <= 9) return true;`, which the main path already handles
-   correctly for 0-9.
-3. `LC0642` - no namespace, so the class sits in the global one while every
-   other solution is in `LeetCode`; and `currentQuery += c` inside `Input` is
-   O(n^2) string building where a `StringBuilder` belongs.
-4. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
+   What has **not** been counted, because it needs a compiler and not a regex:
+   IDE0005 unused usings, the rest of IDE0055 formatting, and IDE2000-2003 blank
+   lines. Flip the flag locally first and read the list before committing it.
+2. `LC0200` - recursive DFS risks stack overflow on a dense grid and destroys
    the input grid; the iterative baseline in the benchmarks project shows the
    alternative.
-5. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
+3. Test gaps: the three fast paths in `LC0088` are uncovered; `int.MinValue` is
    special-cased in `LC0007` but never tested.
-6. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
+4. `LC0200_NumberOfIslandsBenchmark` has never been run; its section in the
    benchmarks README is still a placeholder.
 
 ## Done
 
+- Every file converted to file-scoped namespaces: 47 of them in one pass (20 in
+  `src`, 20 in `tests`, 6 in `benchmarks`; `Program.cs` has top-level statements
+  and no namespace). Done by script with a brace-balance check per file rather
+  than by hand.
+- Guards the constraints make unreachable deleted from `LC0198` (both),
+  `LC0020`, `LC0026` and `LC0200`, plus the redundant 0-9 shortcut in `LC0009`.
+  `LC0007`'s `int.MinValue` guard was deliberately left - its constraint allows
+  that input.
+- `LC0642` rewritten: namespace added, `currentQuery += c` replaced by a
+  `StringBuilder` (was O(n^2)), fields renamed to `_root` / `_currentNode` /
+  `_currentQuery` with `_root` made `readonly`, `ContainsKey` + indexer folded
+  into `TryGetValue`, and `'#'` / `3` lifted into `EndOfSentence` and
+  `SuggestionCount` - which let the comment explaining `'#'` go away with the
+  literal.
+- Braces added to the 8 remaining single-statement bodies (`LC0007`, `LC0242`,
+  `LC0859`, `TreeBuilder`) and trailing whitespace stripped from 8 lines across
+  four test files.
+- `LC0007`'s magic numbers replaced by `MaxBeforeAppendingDigit` and
+  `LastDigitOfMaxValue`, both derived from `int.MaxValue`. This is the example
+  the comments section of this file cites, and the file itself had been
+  violating it; the comment spelling out the arithmetic went away with the
+  literals.
 - Test project migrated from the deprecated `xunit` 2.9.3 to
   **`xunit.v3.mtp-off` 4.0.1**. Read that package name before changing it: the
   plain `xunit.v3` package enables Microsoft Testing Platform and marks the

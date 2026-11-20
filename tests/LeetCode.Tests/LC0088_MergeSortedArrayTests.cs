@@ -4,9 +4,9 @@ public class LC0088_MergeSortedArrayTests
 {
     [Theory]
     [InlineData(
-        new int[] { 1, 2, 3, 0, 0, 0 }, 
+        new int[] { 1, 2, 3, 0, 0, 0 },
         3,
-        new int[] { 2, 5, 6 }, 
+        new int[] { 2, 5, 6 },
         3,
         new int[] { 1, 2, 2, 3, 5, 6 })]
     [InlineData(

@@ -9,8 +9,8 @@ public class LC0021_MergeTwoSortedListsTests
     [InlineData(new int[] { }, new int[] { }, new int[] { })]
     [InlineData(new int[] { }, new int[] { 0 }, new int[] { 0 })]
     [InlineData(
-        new int[] { 1, 2, 3, 4 }, 
-        new int[] { 5, 6, 7, 8 }, 
+        new int[] { 1, 2, 3, 4 },
+        new int[] { 5, 6, 7, 8 },
         new int[] { 1, 2, 3, 4, 5, 6, 7, 8 })]
     [InlineData(
         new int[] { 1, 2, 3 },

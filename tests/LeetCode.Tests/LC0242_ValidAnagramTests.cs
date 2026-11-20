@@ -3,7 +3,7 @@
 public class LC0242_ValidAnagramTests
 {
     [Theory]
-    [InlineData("anagram", "nagaram", true)] 
+    [InlineData("anagram", "nagaram", true)]
     [InlineData("rat",     "car",     false)]
     [InlineData("foobar", "foo", false)]
     [InlineData("longtextreallylongtext", "longtextreallylongtetx", true)]

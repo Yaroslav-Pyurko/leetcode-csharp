@@ -17,7 +17,7 @@ public class LC2236_RootEqualsSumOfChildrenTests
         var root = TreeBuilder.Build(nullableTreeValues)!;
 
         var actual = _solution.CheckTree(root);
-        
+
         Assert.Equal(expected, actual);
     }
 }

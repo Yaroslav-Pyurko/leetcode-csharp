@@ -5,7 +5,9 @@ public class LC0242_ValidAnagram
     public bool IsAnagram(string s, string t)
     {
         if (s.Length != t.Length)
+        {
             return false;
+        }
 
         int[] count = new int[26];
 
@@ -13,12 +15,14 @@ public class LC0242_ValidAnagram
         {
             count[s[i] - 'a']++;
         }
-            
+
         for (int i = 0; i < t.Length; i++)
         {
             count[t[i] - 'a']--;
             if (count[t[i] - 'a'] < 0)
+            {
                 return false;
+            }
         }
 
         return true;

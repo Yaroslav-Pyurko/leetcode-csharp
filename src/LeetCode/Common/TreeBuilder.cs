@@ -5,7 +5,9 @@ public static class TreeBuilder
     public static TreeNode? Build(params int?[] values)
     {
         if (values.Length == 0 || values[0] == null)
+        {
             return null;
+        }
 
         var root = new TreeNode(values[0]!.Value);
         var queue = new Queue<TreeNode>();
